@@ -59,15 +59,15 @@ select {
 /* --- 2. Design System — Custom Properties --- */
 :root {
   /* Paleta de cores */
-  --color-bg: hsl(340, 20%, 8%);
-  /* Fundo escuro rosado */
-  --color-surface: hsl(340, 15%, 13%);
+  --color-bg: hsl(15, 15%, 5%);
+  /* Fundo escuro cobre */
+  --color-surface: hsl(15, 12%, 10%);
   /* Cards e superfícies */
-  --color-border: hsl(340, 12%, 22%);
+  --color-border: hsl(15, 10%, 18%);
   /* Bordas sutis */
-  --color-primary: hsl(340, 70%, 65%);
-  /* Rosa vibrante */
-  --color-primary-dark: hsl(340, 70%, 50%);
+  --color-primary: #C89D96;
+  /* Tom rosado suave */
+  --color-primary-dark: #A07871;
   /* Rosa escuro (hover) */
   --color-text: hsl(340, 15%, 92%);
   /* Texto principal */
@@ -107,9 +107,9 @@ select {
   --radius-full: 9999px;
 
   /* Sombras */
-  --shadow-sm: 0 1px 4px hsl(340 50% 10% / 0.4);
-  --shadow-md: 0 4px 16px hsl(340 50% 10% / 0.5);
-  --shadow-glow: 0 0 20px hsl(340 70% 65% / 0.25);
+  --shadow-sm: 0 1px 4px hsl(15 50% 5% / 0.5);
+  --shadow-md: 0 4px 16px hsl(15 50% 5% / 0.6);
+  --shadow-glow: 0 0 20px hsl(10 30% 68% / 0.25);
 
   /* Transições */
   --transition-fast: 150ms ease;

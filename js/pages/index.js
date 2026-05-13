@@ -27,7 +27,14 @@ async function loadSalonInfo() {
 
     if (elPhone)   elPhone.textContent   = phone   || '';
     if (elAddress) elAddress.textContent = address || '';
-    if (elNotice)  elNotice.textContent  = notice  || '';
+    if (elNotice) {
+      elNotice.textContent = notice || '';
+
+      const elNoticeBoard = elNotice.closest('.notice-board');
+      if (elNoticeBoard) {
+        elNoticeBoard.style.display = notice ? '' : 'none';
+      }
+    }
 
   } catch (err) {
     console.error('[index.js] Erro ao carregar dados do salão:', err);
