@@ -24,12 +24,23 @@ const adminViews   = document.querySelectorAll('.admin-view');
 // ================================================
 // AUTENTICAÇÃO
 // ================================================
-onAuthStateChanged(auth, user => {
+onAuthStateChanged(auth, async user => {
   if (user) {
-    loginScreen.classList.add('hidden');
-    adminPanel.classList.remove('hidden');
-    showView('agenda');
-    loadAgenda(new Date());
+    try {
+      const docSnap = await getDoc(doc(db, 'admins', user.uid));
+      if (docSnap.exists()) {
+        loginScreen.classList.add('hidden');
+        adminPanel.classList.remove('hidden');
+        showView('agenda');
+        loadAgenda(new Date());
+      } else {
+        await signOut(auth);
+        loginError.textContent = 'Acesso negado. Você não é administrador.';
+      }
+    } catch {
+      await signOut(auth);
+      loginError.textContent = 'Erro ao verificar credenciais.';
+    }
   } else {
     loginScreen.classList.remove('hidden');
     adminPanel.classList.add('hidden');
