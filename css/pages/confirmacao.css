@@ -1,0 +1,85 @@
+/* ================================================
+   confirmacao.css — Tela de Confirmação (A5.5)
+   ================================================ */
+
+.confirmation-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-6);
+  padding: var(--space-8) var(--space-6) var(--space-12);
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+/* Ícone de sucesso animado */
+.success-icon {
+  width: 72px;
+  height: 72px;
+  border-radius: var(--radius-full);
+  background: var(--color-success);
+  color: #fff;
+  font-size: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 24px hsl(150 60% 50% / 0.4);
+  animation: popIn var(--transition-slow) cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+}
+
+@keyframes popIn {
+  from { opacity: 0; transform: scale(0.4); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* Card de resumo */
+.booking-summary {
+  width: 100%;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  animation: fadeInUp var(--transition-slow) 200ms both;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-4) var(--space-6);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.summary-row:last-child {
+  border-bottom: none;
+}
+
+.summary-label {
+  font-size: var(--fs-sm);
+  color: var(--color-text-muted);
+}
+
+.summary-value {
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--color-text);
+  text-align: right;
+  max-width: 60%;
+}
+
+/* Botões */
+.confirmation-screen .btn-whatsapp,
+.confirmation-screen .btn-secondary {
+  width: 100%;
+  max-width: 480px;
+  animation: fadeInUp var(--transition-slow) 400ms both;
+}
+
+.confirmation-screen .btn-secondary {
+  animation-delay: 500ms;
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}

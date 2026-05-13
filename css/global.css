@@ -1,0 +1,315 @@
+/* ================================================
+   global.css — Reset, Design System e Utilitários
+   Jeci Vieira Nails
+   ================================================ */
+
+/* --- 1. Reset moderno --- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: 'Outfit', sans-serif;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  min-height: 100dvh;
+  line-height: 1.6;
+}
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+ul,
+ol {
+  list-style: none;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+input,
+textarea,
+select {
+  font-family: inherit;
+  font-size: 1rem;
+}
+
+/* --- 2. Design System — Custom Properties --- */
+:root {
+  /* Paleta de cores */
+  --color-bg: hsl(340, 20%, 8%);
+  /* Fundo escuro rosado */
+  --color-surface: hsl(340, 15%, 13%);
+  /* Cards e superfícies */
+  --color-border: hsl(340, 12%, 22%);
+  /* Bordas sutis */
+  --color-primary: hsl(340, 70%, 65%);
+  /* Rosa vibrante */
+  --color-primary-dark: hsl(340, 70%, 50%);
+  /* Rosa escuro (hover) */
+  --color-text: hsl(340, 15%, 92%);
+  /* Texto principal */
+  --color-text-muted: hsl(340, 10%, 55%);
+  /* Texto secundário */
+  --color-success: hsl(150, 60%, 50%);
+  /* Verde confirmação */
+  --color-whatsapp: hsl(142, 70%, 40%);
+  /* Verde WhatsApp */
+  --color-error: hsl(0, 75%, 60%);
+  /* Vermelho erro */
+
+  /* Tipografia */
+  --font-base: 'Outfit', sans-serif;
+  --fs-xs: 0.75rem;
+  --fs-sm: 0.875rem;
+  --fs-base: 1rem;
+  --fs-md: 1.125rem;
+  --fs-lg: 1.375rem;
+  --fs-xl: 1.75rem;
+  --fs-2xl: 2.25rem;
+
+  /* Espaçamentos */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+
+  /* Bordas */
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-full: 9999px;
+
+  /* Sombras */
+  --shadow-sm: 0 1px 4px hsl(340 50% 10% / 0.4);
+  --shadow-md: 0 4px 16px hsl(340 50% 10% / 0.5);
+  --shadow-glow: 0 0 20px hsl(340 70% 65% / 0.25);
+
+  /* Transições */
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 400ms ease;
+}
+
+/* --- 3. Componentes globais reutilizáveis --- */
+
+/* Botão primário */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: var(--space-4) var(--space-6);
+  background: var(--color-primary);
+  color: hsl(340, 20%, 8%);
+  font-size: var(--fs-base);
+  font-weight: 700;
+  border-radius: var(--radius-full);
+  transition: background var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast);
+  box-shadow: var(--shadow-glow);
+}
+
+.btn-primary:hover {
+  background: var(--color-primary-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 0 28px hsl(340 70% 65% / 0.4);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+.btn-primary:disabled {
+  background: var(--color-border);
+  color: var(--color-text-muted);
+  box-shadow: none;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Botão secundário */
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: var(--space-3) var(--space-6);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  font-size: var(--fs-sm);
+  border-radius: var(--radius-full);
+  transition: border-color var(--transition-fast), color var(--transition-fast);
+}
+
+.btn-secondary:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+/* Botão WhatsApp */
+.btn-whatsapp {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  width: 100%;
+  padding: var(--space-4) var(--space-6);
+  background: var(--color-whatsapp);
+  color: #fff;
+  font-size: var(--fs-base);
+  font-weight: 700;
+  border-radius: var(--radius-full);
+  transition: background var(--transition-fast), transform var(--transition-fast);
+}
+
+.btn-whatsapp:hover {
+  background: hsl(142, 70%, 33%);
+  transform: translateY(-1px);
+}
+
+/* Botão voltar */
+.btn-back {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+  background: var(--color-surface);
+  font-size: var(--fs-lg);
+  transition: background var(--transition-fast);
+}
+
+.btn-back:hover {
+  background: var(--color-border);
+}
+
+/* Cabeçalho de página interna */
+.page-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-6) var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+  position: sticky;
+  top: 0;
+  background: var(--color-bg);
+  z-index: 10;
+}
+
+.page-title {
+  font-size: var(--fs-md);
+  font-weight: 600;
+  flex: 1;
+}
+
+/* Campos de formulário */
+label {
+  display: block;
+  font-size: var(--fs-sm);
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-1);
+  margin-top: var(--space-4);
+}
+
+input[type="text"],
+input[type="email"],
+input[type="tel"],
+input[type="time"],
+input[type="password"],
+textarea,
+select {
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px hsl(340 70% 65% / 0.15);
+}
+
+textarea {
+  resize: vertical;
+}
+
+/* Mensagem de erro */
+.error-msg {
+  font-size: var(--fs-sm);
+  color: var(--color-error);
+  min-height: 1.2em;
+  margin-top: var(--space-2);
+}
+
+/* Utilitário: ocultar */
+.hidden {
+  display: none !important;
+}
+
+/* --- 4. Loader / Skeleton --- */
+.skeleton {
+  background: linear-gradient(90deg,
+      var(--color-surface) 25%,
+      var(--color-border) 50%,
+      var(--color-surface) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+  border-radius: var(--radius-sm);
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* --- 5. Scrollbar personalizada --- */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: var(--radius-full);
+}

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Realize seu agendamento na Jeci Vieira Nails em poucos passos." />
+  <title>Agendamento — Jeci Vieira Nails</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="../css/global.css" />
+  <link rel="stylesheet" href="../css/pages/agendamento.css" />
+</head>
+<body>
+
+  <!-- Cabeçalho de navegação -->
+  <header class="page-header">
+    <a href="../index.html" class="btn-back" aria-label="Voltar para início">&#8592;</a>
+    <h2 class="page-title">Novo Agendamento</h2>
+    <!-- Indicador de progresso (steps A5.1 → A5.5) -->
+    <div class="step-indicator" aria-label="Progresso do agendamento">
+      <span class="step active" data-step="1">1</span>
+      <span class="step" data-step="2">2</span>
+      <span class="step" data-step="3">3</span>
+      <span class="step" data-step="4">4</span>
+    </div>
+  </header>
+
+  <main class="booking-flow">
+
+    <!-- STEP 1 — Escolha do Procedimento (A5.1) -->
+    <section id="step-1" class="booking-step active" aria-label="Escolha o procedimento">
+      <h2 class="step-title">Qual procedimento deseja?</h2>
+      <ul id="procedure-list" class="procedure-list">
+        <!-- Populado via JS com dados do Firebase -->
+      </ul>
+      <button id="btn-step1-next" class="btn-primary" disabled>Próximo</button>
+    </section>
+
+    <!-- STEP 2 — Escolha da Data (A5.2) -->
+    <section id="step-2" class="booking-step" aria-label="Escolha a data">
+      <h2 class="step-title">Qual data prefere?</h2>
+      <div id="date-picker" class="date-picker">
+        <!-- Calendário gerado via JS -->
+      </div>
+      <button id="btn-step2-next" class="btn-primary" disabled>Próximo</button>
+      <button id="btn-step2-back" class="btn-secondary">Voltar</button>
+    </section>
+
+    <!-- STEP 3 — Escolha do Horário (A5.3) -->
+    <section id="step-3" class="booking-step" aria-label="Escolha o horário">
+      <h2 class="step-title">Que horas?</h2>
+      <ul id="time-slot-list" class="time-slot-list">
+        <!-- Horários disponíveis via JS -->
+      </ul>
+      <button id="btn-step3-next" class="btn-primary" disabled>Próximo</button>
+      <button id="btn-step3-back" class="btn-secondary">Voltar</button>
+    </section>
+
+    <!-- STEP 4 — Dados do Cliente (A5.4) -->
+    <section id="step-4" class="booking-step" aria-label="Seus dados">
+      <h2 class="step-title">Seus dados</h2>
+      <form id="client-form" novalidate>
+        <label for="client-name">Nome completo</label>
+        <input id="client-name" type="text" name="name" placeholder="Seu nome" autocomplete="name" required />
+
+        <label for="client-phone">WhatsApp</label>
+        <input id="client-phone" type="tel" name="phone" placeholder="(00) 00000-0000" autocomplete="tel" required />
+
+        <button id="btn-confirmar" type="submit" class="btn-primary">Ver Resumo</button>
+        <button id="btn-step4-back" type="button" class="btn-secondary">Voltar</button>
+      </form>
+    </section>
+
+  </main>
+
+  <script type="module" src="../js/firebase/config.js"></script>
+  <script type="module" src="../js/global.js"></script>
+  <script type="module" src="../js/pages/agendamento.js"></script>
+
+</body>
+</html>

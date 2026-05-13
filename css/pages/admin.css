@@ -1,0 +1,258 @@
+/* ================================================
+   admin.css — Painel Administrativo (Role Admin)
+   ================================================ */
+
+/* ---- Tela de Login ---- */
+.login-screen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100dvh;
+  padding: var(--space-6);
+  background: radial-gradient(ellipse at 50% 0%, hsl(340 40% 14%) 0%, var(--color-bg) 70%);
+}
+
+.login-card {
+  width: 100%;
+  max-width: 380px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-8) var(--space-6);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  box-shadow: var(--shadow-md);
+  animation: fadeInUp var(--transition-slow) both;
+}
+
+.login-logo {
+  width: 72px;
+  height: 72px;
+  border-radius: var(--radius-full);
+  border: 2px solid var(--color-primary);
+}
+
+.login-title {
+  font-size: var(--fs-lg);
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.login-card form {
+  width: 100%;
+}
+
+.login-card .btn-primary {
+  margin-top: var(--space-6);
+}
+
+/* ---- Painel principal ---- */
+.admin-panel {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+}
+
+/* Header Admin */
+.admin-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-bg);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  flex-wrap: wrap;
+}
+
+.admin-title {
+  font-size: var(--fs-md);
+  font-weight: 700;
+  color: var(--color-primary);
+  margin-right: auto;
+}
+
+/* Navegação admin */
+.admin-nav {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.nav-btn {
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-border);
+  font-size: var(--fs-sm);
+  color: var(--color-text-muted);
+  transition: all var(--transition-fast);
+}
+
+.nav-btn:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.nav-btn.active {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: hsl(340, 20%, 8%);
+  font-weight: 700;
+}
+
+/* Botão logout */
+.btn-logout {
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  font-size: var(--fs-sm);
+  color: var(--color-text-muted);
+  transition: all var(--transition-fast);
+}
+
+.btn-logout:hover {
+  border-color: var(--color-error);
+  color: var(--color-error);
+}
+
+/* Views */
+.admin-view {
+  padding: var(--space-4);
+  animation: fadeIn var(--transition-normal) both;
+}
+
+/* Calendário admin */
+.admin-calendar {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  margin-bottom: var(--space-6);
+  min-height: 220px;
+}
+
+/* Lista de agendamentos do dia */
+.appointments-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.appointment-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  transition: border-color var(--transition-fast);
+}
+
+.appointment-card:hover {
+  border-color: var(--color-primary);
+}
+
+.appointment-time {
+  font-size: var(--fs-md);
+  font-weight: 700;
+  color: var(--color-primary);
+  white-space: nowrap;
+}
+
+.appointment-info {
+  flex: 1;
+}
+
+.appointment-client {
+  font-weight: 600;
+  font-size: var(--fs-base);
+}
+
+.appointment-procedure {
+  font-size: var(--fs-sm);
+  color: var(--color-text-muted);
+}
+
+.appointment-phone {
+  font-size: var(--fs-sm);
+  color: var(--color-text-muted);
+}
+
+/* Barra de ferramentas das views */
+.view-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-4);
+}
+
+.view-toolbar h3 {
+  font-size: var(--fs-md);
+  font-weight: 700;
+}
+
+.btn-sm {
+  width: auto;
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--fs-sm);
+}
+
+/* Lista de procedimentos admin */
+.procedures-admin-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.procedure-admin-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-4);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.procedure-admin-actions {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.btn-icon {
+  padding: var(--space-2);
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-sm);
+  color: var(--color-text-muted);
+  transition: color var(--transition-fast);
+}
+
+.btn-icon:hover { color: var(--color-primary); }
+.btn-icon.delete:hover { color: var(--color-error); }
+
+/* Configurações */
+#view-configuracoes h3 {
+  font-size: var(--fs-md);
+  font-weight: 700;
+  margin-bottom: var(--space-4);
+}
+
+#salon-config-form .btn-primary {
+  margin-top: var(--space-6);
+}
+
+/* Animações */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}

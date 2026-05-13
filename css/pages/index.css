@@ -1,0 +1,98 @@
+/* ================================================
+   index.css — Estilos da Tela Inicial (Role Cliente)
+   ================================================ */
+
+.home-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-8);
+  min-height: 100dvh;
+  padding: var(--space-8) var(--space-6);
+  text-align: center;
+}
+
+/* Cabeçalho do salão */
+.salon-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.salon-logo {
+  width: 100px;
+  height: 100px;
+  border-radius: var(--radius-full);
+  object-fit: cover;
+  border: 2px solid var(--color-primary);
+  box-shadow: var(--shadow-glow);
+  animation: fadeInDown var(--transition-slow) both;
+}
+
+.salon-name {
+  font-size: var(--fs-2xl);
+  font-weight: 700;
+  color: var(--color-text);
+  animation: fadeInDown var(--transition-slow) 100ms both;
+}
+
+.salon-tagline {
+  font-size: var(--fs-sm);
+  color: var(--color-primary);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 600;
+  animation: fadeInDown var(--transition-slow) 200ms both;
+}
+
+/* Informações de contato */
+.contact-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  animation: fadeInUp var(--transition-slow) 300ms both;
+}
+
+.contact-item {
+  font-size: var(--fs-sm);
+  color: var(--color-text-muted);
+}
+
+/* Quadro de avisos */
+.notice-board {
+  width: 100%;
+  max-width: 360px;
+  padding: var(--space-4) var(--space-6);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-left: 3px solid var(--color-primary);
+  border-radius: var(--radius-md);
+  animation: fadeInUp var(--transition-slow) 400ms both;
+}
+
+.notice-text {
+  font-size: var(--fs-sm);
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+/* CTA Agendamento */
+.home-screen .btn-primary {
+  max-width: 360px;
+  font-size: var(--fs-md);
+  padding: var(--space-4) var(--space-8);
+  animation: fadeInUp var(--transition-slow) 500ms both;
+}
+
+/* Animações de entrada */
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}

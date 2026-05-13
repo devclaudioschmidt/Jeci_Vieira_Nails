@@ -1,0 +1,149 @@
+/* ================================================
+   agendamento.css — Fluxo de Agendamento (Steps)
+   ================================================ */
+
+/* Indicador de progresso */
+.step-indicator {
+  display: flex;
+  gap: var(--space-2);
+  margin-left: auto;
+}
+
+.step {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-full);
+  border: 2px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  color: var(--color-text-muted);
+  transition: border-color var(--transition-normal), background var(--transition-normal), color var(--transition-normal);
+}
+
+.step.active {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: hsl(340, 20%, 8%);
+}
+
+.step.done {
+  border-color: var(--color-success);
+  background: var(--color-success);
+  color: #fff;
+}
+
+/* Container do fluxo */
+.booking-flow {
+  padding: var(--space-6) var(--space-4) var(--space-12);
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+/* Steps individuais */
+.booking-step {
+  display: none;
+  flex-direction: column;
+  gap: var(--space-6);
+  animation: slideIn var(--transition-normal) both;
+}
+
+.booking-step.active {
+  display: flex;
+}
+
+.step-title {
+  font-size: var(--fs-lg);
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+/* Lista de procedimentos */
+.procedure-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.procedure-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-4);
+  background: var(--color-surface);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: border-color var(--transition-fast), background var(--transition-fast);
+}
+
+.procedure-item:hover {
+  border-color: var(--color-primary);
+}
+
+.procedure-item.selected {
+  border-color: var(--color-primary);
+  background: hsl(340, 70%, 65% / 0.08);
+}
+
+.procedure-name {
+  font-weight: 600;
+}
+
+.procedure-price {
+  font-size: var(--fs-sm);
+  color: var(--color-primary);
+  font-weight: 700;
+}
+
+/* Date Picker */
+.date-picker {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  overflow: hidden;
+}
+
+/* Horários disponíveis */
+.time-slot-list {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-3);
+}
+
+.time-slot {
+  padding: var(--space-3);
+  background: var(--color-surface);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-md);
+  text-align: center;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color var(--transition-fast), background var(--transition-fast);
+}
+
+.time-slot:hover {
+  border-color: var(--color-primary);
+}
+
+.time-slot.selected {
+  border-color: var(--color-primary);
+  background: hsl(340, 70%, 65% / 0.1);
+  color: var(--color-primary);
+}
+
+.time-slot.unavailable {
+  opacity: 0.35;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Animação de troca de step */
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(20px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
