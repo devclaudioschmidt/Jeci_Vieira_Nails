@@ -193,6 +193,15 @@
   pointer-events: none;
 }
 
+/* Aumenta o espaçamento do formulário de dados do cliente -- botões com mais respiro */
+#client-form .btn-primary {
+  margin-top: var(--space-8);
+}
+
+#client-form .btn-secondary {
+  margin-top: var(--space-4);
+}
+
 /* Animação de troca de step */
 @keyframes slideIn {
   from { opacity: 0; transform: translateX(20px); }

@@ -279,7 +279,17 @@ textarea {
   display: none !important;
 }
 
-/* --- 4. Loader / Skeleton --- */
+/* --- 4. Logotipo do Salão (compartilhado entre páginas) --- */
+
+.salon-logo {
+  max-width: 315px;
+  height: auto;
+  margin-top: var(--space-16);
+  margin-bottom: calc(var(--space-16) * 2);
+  animation: fadeInDown var(--transition-slow) both;
+}
+
+/* --- 5. Animações e estados de carregamento --- */
 .skeleton {
   background: linear-gradient(90deg,
       var(--color-surface) 25%,
@@ -300,7 +310,23 @@ textarea {
   }
 }
 
-/* --- 5. Scrollbar personalizada --- */
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* --- 6. Fundo gradiente compartilhado entre páginas --- */
+
+.bg-gradient {
+  background: radial-gradient(ellipse at 50% 0%, hsl(340 40% 14%) 0%, var(--color-bg) 70%);
+}
+
+/* --- 7. Scrollbar personalizada --- */
 ::-webkit-scrollbar {
   width: 6px;
 }

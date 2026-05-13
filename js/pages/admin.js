@@ -6,7 +6,7 @@ import { signInWithEmailAndPassword, signOut, onAuthStateChanged }
                                                              from 'https://www.gstatic.com/firebasejs/11.7.1/firebase-auth.js';
 import {
   collection, doc, getDoc, getDocs, addDoc, deleteDoc, setDoc,
-  query, where, orderBy, serverTimestamp
+  query, where, orderBy, serverTimestamp, limit
 }                                                            from 'https://www.gstatic.com/firebasejs/11.7.1/firebase-firestore.js';
 import { showToast, formatDatePTBR }                         from '../global.js';
 
@@ -156,37 +156,32 @@ async function loadAgenda(date) {
   const list    = document.getElementById('appointments-list');
   const dateStr = date.toISOString().split('T')[0];
 
-  list.innerHTML = '<li class="skeleton" style="height:72px;border-radius:12px;margin-bottom:12px;"></li>'.repeat(3);
+  list.innerHTML = '<li class="skeleton-card slide-up-anim"></li>'.repeat(3);
 
   try {
     const q        = query(
       collection(db, 'agendamentos'),
       where('date', '==', dateStr),
-      orderBy('time')
+      orderBy('time'),
+      limit(50)
     );
     const snapshot = await getDocs(q);
 
     if (snapshot.empty) {
-      list.innerHTML = `<li style="text-align:center;color:var(--color-text-muted);padding:2rem 0;">
-                          Nenhum agendamento para este dia.
-                        </li>`;
+      list.innerHTML = `<li class="empty-state-msg slide-up-anim">Nenhum agendamento para este dia.</li>`;
       return;
     }
 
     list.innerHTML = '';
+    const template = document.getElementById('tpl-appointment');
     snapshot.forEach(docSnap => {
-      const d  = docSnap.data();
-      const li = document.createElement('li');
-      li.className = 'appointment-card';
-      li.innerHTML = `
-        <span class="appointment-time">${d.time}</span>
-        <div class="appointment-info">
-          <p class="appointment-client">${d.clientName}</p>
-          <p class="appointment-procedure">${d.procedureName}</p>
-          <p class="appointment-phone">${d.clientPhone}</p>
-        </div>
-      `;
-      list.appendChild(li);
+      const d = docSnap.data();
+      const clone = template.content.cloneNode(true);
+      clone.querySelector('.appointment-time').textContent = d.time;
+      clone.querySelector('.appointment-client').textContent = d.clientName;
+      clone.querySelector('.appointment-procedure').textContent = d.procedureName;
+      clone.querySelector('.appointment-phone').textContent = d.clientPhone;
+      list.appendChild(clone);
     });
 
   } catch (err) {
@@ -200,36 +195,41 @@ async function loadAgenda(date) {
 // ================================================
 async function loadProceduresAdmin() {
   const list = document.getElementById('procedures-admin-list');
-  list.innerHTML = '<li class="skeleton" style="height:56px;border-radius:12px;margin-bottom:8px;"></li>'.repeat(4);
+  list.innerHTML = '<li class="skeleton-card small slide-up-anim"></li>'.repeat(4);
 
   try {
-    const q        = query(collection(db, 'procedimentos'), orderBy('name'));
+    const q        = query(collection(db, 'procedimentos'), orderBy('name'), limit(100));
     const snapshot = await getDocs(q);
 
     list.innerHTML = '';
 
     if (snapshot.empty) {
-      list.innerHTML = `<li style="text-align:center;color:var(--color-text-muted);padding:1.5rem 0;">
-                          Nenhum procedimento cadastrado.
-                        </li>`;
+      list.innerHTML = `<li class="empty-state-msg slide-up-anim">Nenhum procedimento cadastrado.</li>`;
+      return;
     }
 
+    const template = document.getElementById('tpl-procedure');
     snapshot.forEach(docSnap => {
-      const d  = docSnap.data();
-      const li = document.createElement('li');
-      li.className = 'procedure-admin-item';
-      li.innerHTML = `
-        <div>
-          <strong>${d.name}</strong>
-          ${d.price    ? `<span style="color:var(--color-primary);margin-left:8px;">R$ ${Number(d.price).toFixed(2)}</span>` : ''}
-          ${d.duration ? `<span style="color:var(--color-text-muted);margin-left:8px;font-size:.8rem;">${d.duration} min</span>` : ''}
-        </div>
-        <div class="procedure-admin-actions">
-          <button class="btn-icon delete" data-id="${docSnap.id}" aria-label="Excluir ${d.name}">🗑️</button>
-        </div>
-      `;
-      li.querySelector('.delete').addEventListener('click', () => deleteProcedure(docSnap.id));
-      list.appendChild(li);
+      const d = docSnap.data();
+      const clone = template.content.cloneNode(true);
+      clone.querySelector('.procedure-name').textContent = d.name;
+      clone.querySelector('.procedure-price').textContent = d.price ? `R$ ${Number(d.price).toFixed(2)}` : '';
+      clone.querySelector('.procedure-duration').textContent = d.duration ? `${d.duration} min` : '';
+      
+      const editBtn = clone.querySelector('.edit');
+      if (editBtn) {
+        editBtn.addEventListener('click', () => {
+          document.getElementById('procedure-id').value = docSnap.id;
+          document.getElementById('procedure-name').value = d.name;
+          document.getElementById('procedure-price').value = d.price || '';
+          document.getElementById('procedure-duration').value = d.duration || 60;
+          document.getElementById('modal-title').textContent = 'Editar Procedimento';
+          document.getElementById('modal-procedure').showModal();
+        });
+      }
+
+      clone.querySelector('.delete').addEventListener('click', () => deleteProcedure(docSnap.id));
+      list.appendChild(clone);
     });
 
   } catch (err) {
@@ -238,29 +238,60 @@ async function loadProceduresAdmin() {
   }
 }
 
+// --- Modal Actions ---
+const modalProcedure = document.getElementById('modal-procedure');
+const formProcedure  = document.getElementById('form-procedure');
+const btnCloseModal  = document.getElementById('btn-close-modal');
+const btnCancelModal = document.getElementById('btn-cancel-modal');
+
 document.getElementById('btn-add-procedure').addEventListener('click', () => {
-  const name     = prompt('Nome do procedimento:');
-  if (!name?.trim()) return;
-  const price    = prompt('Preço (ex.: 45.00):');
-  const duration = prompt('Duração em minutos (ex.: 60):');
-  addProcedure(name.trim(), price, duration);
+  formProcedure.reset();
+  document.getElementById('procedure-id').value = '';
+  document.getElementById('modal-title').textContent = 'Novo Procedimento';
+  modalProcedure.showModal();
 });
 
-async function addProcedure(name, price, duration) {
+const closeModal = () => modalProcedure.close();
+btnCloseModal.addEventListener('click', closeModal);
+btnCancelModal.addEventListener('click', closeModal);
+
+formProcedure.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const id       = document.getElementById('procedure-id').value;
+  const name     = document.getElementById('procedure-name').value.trim();
+  const price    = document.getElementById('procedure-price').value;
+  const duration = document.getElementById('procedure-duration').value;
+
+  const data = {
+    name,
+    price:    price    ? parseFloat(price)    : null,
+    duration: duration ? parseInt(duration)   : 60,
+    updatedAt: serverTimestamp(),
+  };
+
+  const btn = document.getElementById('btn-save-procedure');
+  btn.disabled = true;
+  btn.textContent = 'Salvando…';
+
   try {
-    await addDoc(collection(db, 'procedimentos'), {
-      name,
-      price:    price    ? parseFloat(price)    : null,
-      duration: duration ? parseInt(duration)   : 60,
-      createdAt: serverTimestamp(),
-    });
-    showToast(`"${name}" adicionado!`, 'success');
+    if (id) {
+      await setDoc(doc(db, 'procedimentos', id), data, { merge: true });
+      showToast(`"${name}" atualizado!`, 'success');
+    } else {
+      data.createdAt = serverTimestamp();
+      await addDoc(collection(db, 'procedimentos'), data);
+      showToast(`"${name}" adicionado!`, 'success');
+    }
+    closeModal();
     loadProceduresAdmin();
   } catch (err) {
-    console.error('[admin.js] Erro ao adicionar procedimento:', err);
-    showToast('Erro ao adicionar procedimento.', 'error');
+    console.error('[admin.js] Erro ao salvar procedimento:', err);
+    showToast('Erro ao salvar procedimento.', 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Salvar';
   }
-}
+});
 
 async function deleteProcedure(id) {
   if (!confirm('Deseja excluir este procedimento?')) return;

@@ -15,10 +15,13 @@
 </head>
 <body>
 
-  <!-- ===== TELA DE LOGIN (B1) ===== -->
-  <section id="login-screen" class="login-screen" aria-label="Login do administrador">
+  <!-- ===== TELA DE LOGIN ADMIN (B1) ===== -->
+  <section id="login-screen" class="login-screen bg-gradient" aria-label="Login do administrador">
+
+    <!-- Logotipo do salão (mesmo SVG e classe do index) -->
+    <img src="../img/logoJeciVieira.svg" alt="Jeci Vieira Nails — Logo" class="salon-logo" />
+
     <div class="login-card">
-      <img src="../assets/logo.svg" alt="Jeci Vieira Nails" class="login-logo" />
       <h1 class="login-title">Área Restrita</h1>
 
       <form id="login-form" novalidate>
@@ -96,6 +99,58 @@
     </div>
 
   </section>
+
+  <!-- ===== MODAIS ===== -->
+  <dialog id="modal-procedure" class="admin-modal" aria-labelledby="modal-title">
+    <div class="modal-content">
+      <header class="modal-header">
+        <h3 id="modal-title">Novo Procedimento</h3>
+        <button id="btn-close-modal" class="btn-icon" aria-label="Fechar modal">&times;</button>
+      </header>
+      <form id="form-procedure">
+        <input type="hidden" id="procedure-id" name="procedureId" />
+        
+        <label for="procedure-name">Nome do procedimento</label>
+        <input type="text" id="procedure-name" name="name" required placeholder="Ex.: Manicure Simples" />
+
+        <label for="procedure-price">Preço (R$)</label>
+        <input type="number" id="procedure-price" name="price" step="0.01" min="0" placeholder="Ex.: 45.00" />
+
+        <label for="procedure-duration">Duração (minutos)</label>
+        <input type="number" id="procedure-duration" name="duration" required min="1" value="60" placeholder="Ex.: 60" />
+
+        <div class="modal-actions">
+          <button type="button" id="btn-cancel-modal" class="btn-secondary">Cancelar</button>
+          <button type="submit" id="btn-save-procedure" class="btn-primary">Salvar</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <!-- ===== TEMPLATES ===== -->
+  <template id="tpl-appointment">
+    <li class="appointment-card slide-up-anim">
+      <span class="appointment-time"></span>
+      <div class="appointment-info">
+        <p class="appointment-client"></p>
+        <p class="appointment-procedure"></p>
+        <p class="appointment-phone"></p>
+      </div>
+    </li>
+  </template>
+
+  <template id="tpl-procedure">
+    <li class="procedure-admin-item slide-up-anim">
+      <div class="procedure-info">
+        <strong class="procedure-name"></strong>
+        <span class="procedure-price"></span>
+        <span class="procedure-duration"></span>
+      </div>
+      <div class="procedure-admin-actions">
+        <button class="btn-icon delete" aria-label="Excluir">🗑️</button>
+      </div>
+    </li>
+  </template>
 
   <script type="module" src="../js/firebase/config.js"></script>
   <script type="module" src="../js/global.js"></script>
