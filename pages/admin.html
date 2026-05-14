@@ -43,13 +43,15 @@
 
     <!-- Barra superior -->
     <header class="admin-header">
-      <h2 class="admin-title">Agenda</h2>
+      <div class="admin-top-row">
+        <h2 class="admin-title" id="admin-greeting">Agenda</h2>
+        <button id="btn-logout" class="btn-logout" aria-label="Sair">Sair</button>
+      </div>
       <nav class="admin-nav" aria-label="Navegação admin">
         <button id="nav-agenda"      class="nav-btn active"   data-view="agenda">Agenda</button>
         <button id="nav-procedimentos" class="nav-btn"        data-view="procedimentos">Procedimentos</button>
         <button id="nav-configuracoes" class="nav-btn"        data-view="configuracoes">Configurações</button>
       </nav>
-      <button id="btn-logout" class="btn-logout" aria-label="Sair">Sair</button>
     </header>
 
     <!-- VIEW: Agenda (B2) -->

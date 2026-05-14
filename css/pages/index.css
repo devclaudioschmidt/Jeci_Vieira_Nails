@@ -103,6 +103,7 @@
 }
 
 .search-price {
+  color: var(--color-primary);
   font-weight: 700;
   font-size: var(--fs-sm);
 }
@@ -114,50 +115,6 @@
 }
 
 /* ---- Modal de consulta de agendamentos ---- */
-
-.app-modal {
-  border: none;
-  border-radius: var(--radius-lg);
-  background: transparent;
-  padding: 0;
-  max-width: 400px;
-  width: 90%;
-  margin: auto;
-}
-
-.app-modal::backdrop {
-  background: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(4px);
-  animation: fadeIn var(--transition-normal) both;
-}
-
-.app-modal[open] {
-  animation: fadeIn var(--transition-normal) forwards;
-}
-
-.app-modal .modal-content {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  padding: var(--space-6);
-  box-shadow: var(--shadow-lg);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-  position: relative;
-}
-
-.app-modal .modal-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.app-modal .modal-header h3 {
-  font-size: var(--fs-md);
-  font-weight: 700;
-  color: var(--color-text);
-}
 
 #btn-close-search {
   width: 28px;
@@ -181,11 +138,3 @@
   transform: scale(1.1);
   filter: brightness(1.2);
 }
-
-/* Animação de fade usada no modal */
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-
-

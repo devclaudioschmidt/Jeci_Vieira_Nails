@@ -3,7 +3,7 @@
 // ================================================
 import { db }                         from '../firebase/config.js';
 import { doc, getDoc, collection, query, where, getDocs, orderBy, limit } from 'https://www.gstatic.com/firebasejs/11.7.1/firebase-firestore.js';
-import { showToast, formatDatePTBR, applyPhoneMask } from '../global.js';
+import { showToast, formatDatePTBR, applyPhoneMask, getGreeting } from '../global.js';
 
 /**
  * Carrega as configurações do salão gravadas pelo Admin
@@ -13,6 +13,7 @@ import { showToast, formatDatePTBR, applyPhoneMask } from '../global.js';
  *   /configuracoes/salao → { phone, address, notice }
  */
 async function loadSalonInfo() {
+  document.getElementById('welcome-title').textContent = getGreeting();
   try {
     const docRef  = doc(db, 'configuracoes', 'salao');
     const docSnap = await getDoc(docRef);

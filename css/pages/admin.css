@@ -47,27 +47,33 @@
 /* Header Admin */
 .admin-header {
   display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: var(--space-3);
-  padding: var(--space-4) var(--space-4);
+  padding: var(--space-3) var(--space-4);
   border-bottom: 1px solid var(--color-border);
   background: var(--color-bg);
   position: sticky;
   top: 0;
   z-index: 10;
-  flex-wrap: wrap;
+}
+
+.admin-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
 }
 
 .admin-title {
   font-size: var(--fs-md);
   font-weight: 700;
   color: var(--color-primary);
-  margin-right: auto;
 }
 
 /* Navegação admin */
 .admin-nav {
   display: flex;
+  justify-content: center;
   gap: var(--space-2);
   flex-wrap: wrap;
 }

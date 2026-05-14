@@ -47,6 +47,17 @@ export function buildWhatsAppUrl(phone, text) {
 }
 
 /**
+ * Retorna saudação baseada no horário do dia.
+ * @returns {string} "Bom dia!", "Boa tarde!" ou "Boa noite!"
+ */
+export function getGreeting() {
+  const hour = new Date().getHours();
+  if (hour < 12) return 'Bom dia!';
+  if (hour < 18) return 'Boa tarde!';
+  return 'Boa noite!';
+}
+
+/**
  * Exibe um toast de feedback não-intrusivo.
  * @param {string}  message
  * @param {'success'|'error'|'info'} type

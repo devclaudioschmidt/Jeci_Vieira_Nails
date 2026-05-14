@@ -8,7 +8,7 @@ import {
   collection, doc, getDoc, getDocs, addDoc, deleteDoc, setDoc,
   query, where, orderBy, serverTimestamp, limit
 }                                                            from 'https://www.gstatic.com/firebasejs/11.7.1/firebase-firestore.js';
-import { showToast, formatDatePTBR }                         from '../global.js';
+import { showToast, formatDatePTBR, getGreeting }             from '../global.js';
 
 // ---- Referências DOM ----
 const loginScreen  = document.getElementById('login-screen');
@@ -31,6 +31,7 @@ onAuthStateChanged(auth, async user => {
       if (docSnap.exists()) {
         loginScreen.classList.add('hidden');
         adminPanel.classList.remove('hidden');
+        document.getElementById('admin-greeting').textContent = getGreeting();
         showView('agenda');
         loadAgenda(new Date());
       } else {
@@ -162,7 +163,6 @@ async function loadAgenda(date) {
     const q        = query(
       collection(db, 'agendamentos'),
       where('date', '==', dateStr),
-      orderBy('time'),
       limit(50)
     );
     const snapshot = await getDocs(q);
@@ -174,8 +174,16 @@ async function loadAgenda(date) {
 
     list.innerHTML = '';
     const template = document.getElementById('tpl-appointment');
-    snapshot.forEach(docSnap => {
-      const d = docSnap.data();
+    
+    // Ordenação em memória (JavaScript) para evitar a necessidade de Índice Composto no Firestore
+    const results = [];
+    snapshot.forEach(docSnap => results.push(docSnap.data()));
+    
+    results.sort((a, b) => {
+      return a.time > b.time ? 1 : -1; // Mais cedo primeiro
+    });
+
+    results.forEach(d => {
       const clone = template.content.cloneNode(true);
       clone.querySelector('.appointment-time').textContent = d.time;
       clone.querySelector('.appointment-client').textContent = d.clientName;

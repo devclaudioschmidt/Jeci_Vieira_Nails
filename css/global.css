@@ -341,6 +341,11 @@ textarea {
 }
 
 /* --- 8. Modais e Utilitários Globais --- */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
 @keyframes slideUpAnim {
   from { opacity: 0; transform: translateY(24px); }
   to   { opacity: 1; transform: translateY(0); }
@@ -441,4 +446,80 @@ textarea {
 
 .modal-actions .btn-primary {
   color: hsl(340, 20%, 8%);
+}
+
+/* --- 9. Calendário (compartilhado entre páginas) --- */
+
+.cal-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-4);
+}
+
+.cal-nav button {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--fs-lg);
+  color: var(--color-text);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.cal-nav button:hover {
+  background: var(--color-border);
+}
+
+.calendar-month {
+  font-size: var(--fs-base);
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: var(--space-2);
+  text-align: center;
+}
+
+.cal-header {
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-2);
+}
+
+.cal-day {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--color-text);
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color var(--transition-fast), background var(--transition-fast), color var(--transition-fast);
+}
+
+.cal-day:not(.disabled):hover {
+  border-color: var(--color-primary);
+}
+
+.cal-day.selected {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: hsl(340, 20%, 8%);
+}
+
+.cal-day.disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  pointer-events: none;
 }
