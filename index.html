@@ -103,18 +103,7 @@
   <script type="module" src="js/global.js"></script>
   <script type="module" src="js/pages/index.js"></script>
 
-  <!-- Limpeza de Service Workers (Remoção do PWA) -->
-  <script>
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.getRegistrations().then(registrations => {
-        for (const registration of registrations) {
-          registration.unregister().then(() => {
-            console.log('[PWA] Service Worker removido com sucesso');
-          });
-        }
-      });
-    }
-  </script>
+
 
 </body>
 
