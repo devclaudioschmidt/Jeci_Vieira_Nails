@@ -235,100 +235,7 @@
   margin-top: var(--space-6);
 }
 
-/* Animações */
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
 
-@keyframes slideUpAnim {
-  from { opacity: 0; transform: translateY(24px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes shimmer {
-  100% { transform: translateX(100%); }
-}
-
-/* Utilitários e Estados (Animações Contínuas) */
-.slide-up-anim {
-  animation: slideUpAnim var(--transition-normal) both;
-}
-
-.empty-state-msg {
-  text-align: center;
-  color: var(--color-text-muted);
-  padding: var(--space-8) 0;
-  width: 100%;
-  animation: fadeIn var(--transition-normal) both;
-}
-
-.skeleton-card {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  height: 72px;
-  position: relative;
-  overflow: hidden;
-  animation: fadeIn var(--transition-fast) both;
-}
-
-.skeleton-card.small {
-  height: 56px;
-}
-
-.skeleton-card::after {
-  content: "";
-  position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
-  transform: translateX(-100%);
-  animation: shimmer 1.5s infinite;
-}
-
-/* Modais Customizados */
-.admin-modal {
-  border: none;
-  border-radius: var(--radius-lg);
-  background: transparent;
-  padding: 0;
-  max-width: 400px;
-  width: 90%;
-  margin: auto;
-}
-
-.admin-modal::backdrop {
-  background: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(4px);
-  animation: fadeIn var(--transition-normal) both;
-}
-
-.admin-modal[open] {
-  animation: slideUpAnim var(--transition-normal) forwards;
-}
-
-.modal-content {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  padding: var(--space-6);
-  box-shadow: var(--shadow-lg);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-}
-
-.modal-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.modal-header h3 {
-  font-size: var(--fs-md);
-  font-weight: 700;
-  color: var(--color-text);
-}
 
 #form-procedure {
   display: flex;
@@ -336,27 +243,7 @@
   gap: var(--space-1);
 }
 
-.modal-actions {
-  display: flex;
-  gap: var(--space-3);
-  justify-content: flex-end;
-  margin-top: var(--space-4);
-}
 
-.btn-secondary {
-  background: transparent;
-  border: 1px solid var(--color-border);
-  color: var(--color-text);
-  padding: var(--space-3) var(--space-6);
-  border-radius: var(--radius-full);
-  font-weight: 600;
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-.btn-secondary:hover {
-  background: var(--color-border);
-}
 
 /* Procedimentos Info */
 .procedure-info {

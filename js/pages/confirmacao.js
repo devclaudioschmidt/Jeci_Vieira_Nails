@@ -34,6 +34,7 @@ document.getElementById('btn-confirmar-whatsapp').addEventListener('click', asyn
     await addDoc(collection(db, 'agendamentos'), {
       procedureId:   booking.procedure?.id   ?? null,
       procedureName: booking.procedure?.name ?? '',
+      price:         booking.procedure?.price ?? null,
       date:          booking.date.toISOString().split('T')[0],  // "YYYY-MM-DD"
       time:          booking.time,
       clientName:    booking.name,

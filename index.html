@@ -41,6 +41,11 @@
       Agendar Horário
     </a>
 
+    <!-- Consulta de Agendamentos -->
+    <button id="btn-open-search" class="btn-secondary" style="margin-top: var(--space-4); margin-bottom: var(--space-8);">
+      Consultar meus agendamentos
+    </button>
+
     <!-- Rodapé: Contatos e Endereço -->
     <footer class="salon-footer">
       <p id="salon-phone" class="contact-item"><!-- Carregado via JS --></p>
@@ -48,6 +53,43 @@
     </footer>
 
   </main>
+
+  <!-- ===== MODAL DE CONSULTA ===== -->
+  <dialog id="modal-search-appointments" class="app-modal" aria-labelledby="modal-search-title">
+    <div class="modal-content">
+      <header class="modal-header">
+        <h3 id="modal-search-title">Meus Agendamentos</h3>
+        <button id="btn-close-search" aria-label="Fechar consulta">&times;</button>
+      </header>
+      
+      <form id="form-search-appointments">
+        <label for="search-phone">Informe seu WhatsApp</label>
+        <input type="tel" id="search-phone" name="phone" required placeholder="(11) 99999-9999" />
+        
+        <div class="modal-actions">
+          <button type="submit" id="btn-submit-search" class="btn-primary">Buscar</button>
+        </div>
+      </form>
+
+      <ul id="search-results-list" class="appointments-list hidden">
+        <!-- Populado via JS -->
+      </ul>
+    </div>
+  </dialog>
+
+  <!-- ===== TEMPLATES ===== -->
+  <template id="tpl-search-result">
+    <li class="appointment-card slide-up-anim search-result-card">
+      <div class="search-result-row">
+        <strong class="search-date"></strong>
+        <strong class="search-time"></strong>
+      </div>
+      <div class="search-result-row">
+        <span class="search-procedure"></span>
+        <span class="search-price"></span>
+      </div>
+    </li>
+  </template>
 
   <!-- Scripts -->
   <script type="module" src="js/firebase/config.js"></script>
