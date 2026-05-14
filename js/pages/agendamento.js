@@ -170,10 +170,23 @@ async function buildTimeSlots() {
     const docSnap = await getDoc(doc(db, 'configuracoes', 'salao'));
     const config = docSnap.exists() ? docSnap.data() : {};
     
-    const hStart = config.hoursStart || '09:00';
-    const hEnd   = config.hoursEnd   || '18:00';
-    const intStart = config.hoursIntervalStart || '12:00';
-    const intEnd   = config.hoursIntervalEnd   || '13:00';
+    const isSaturday = booking.date.getDay() === 6;
+
+    let hStart, hEnd, intStart, intEnd;
+
+    if (isSaturday) {
+      // Sábado: usa horários específicos, sem intervalo de almoço
+      hStart   = config.hoursSaturdayStart || '09:00';
+      hEnd     = config.hoursSaturdayEnd   || '13:00';
+      intStart = null;
+      intEnd   = null;
+    } else {
+      // Dias úteis: horários normais com intervalo
+      hStart   = config.hoursStart         || '09:00';
+      hEnd     = config.hoursEnd           || '18:00';
+      intStart = config.hoursIntervalStart || '12:00';
+      intEnd   = config.hoursIntervalEnd   || '13:00';
+    }
 
     // Helper: "HH:MM" -> minutos
     const toMin = (t) => {
@@ -191,8 +204,8 @@ async function buildTimeSlots() {
 
     const startMin = toMin(hStart);
     const endMin   = toMin(hEnd);
-    const iStart   = toMin(intStart);
-    const iEnd     = toMin(intEnd);
+    const iStart   = intStart ? toMin(intStart) : null;
+    const iEnd     = intEnd   ? toMin(intEnd)   : null;
 
     // 2. Obter agendamentos do dia selecionado
     // Formatar data localmente para evitar bugs de TimeZone com toISOString()
@@ -224,10 +237,11 @@ async function buildTimeSlots() {
       // 3.1 Checar se passa do fim do expediente
       if (slotEnd > endMin) continue;
 
-      // 3.2 Checar se conflita com o intervalo de almoço
-      // Intersecção de [slotStart, slotEnd] com [iStart, iEnd]
-      if (Math.max(slotStart, iStart) < Math.min(slotEnd, iEnd)) {
-        continue;
+      // 3.2 Checar se conflita com o intervalo de almoço (apenas dias com intervalo definido)
+      if (iStart !== null && iEnd !== null) {
+        if (Math.max(slotStart, iStart) < Math.min(slotEnd, iEnd)) {
+          continue;
+        }
       }
 
       // 3.3 Checar se conflita com agendamentos existentes

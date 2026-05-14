@@ -8,7 +8,7 @@ import {
   collection, doc, getDoc, getDocs, addDoc, deleteDoc, setDoc,
   query, where, orderBy, serverTimestamp, limit
 }                                                            from 'https://www.gstatic.com/firebasejs/11.7.1/firebase-firestore.js';
-import { showToast, formatDatePTBR, getGreeting }             from '../global.js';
+import { showToast, formatDatePTBR, getGreeting, buildWhatsAppUrl } from '../global.js';
 
 // ---- Referências DOM ----
 const loginScreen  = document.getElementById('login-screen');
@@ -189,6 +189,25 @@ async function loadAgenda(date) {
       clone.querySelector('.appointment-client').textContent = d.clientName;
       clone.querySelector('.appointment-procedure').textContent = d.procedureName;
       clone.querySelector('.appointment-phone').textContent = d.clientPhone;
+
+      // Botão WhatsApp: montar mensagem de lembrete para o cliente
+      const btnWpp = clone.querySelector('.btn-whatsapp-client');
+      if (btnWpp) {
+        btnWpp.addEventListener('click', () => {
+          const dateObj = new Date(d.date + 'T00:00:00'); // Evitar bugs de TimeZone
+          const dateFormatted = formatDatePTBR(dateObj);
+          const message =
+            `Olá, ${d.clientName}! 😊\n\n` +
+            `Passando para lembrar do seu agendamento:\n` +
+            `📌 Procedimento: *${d.procedureName}*\n` +
+            `📅 Data: *${dateFormatted}*\n` +
+            `🕐 Horário: *${d.time}*\n\n` +
+            `Qualquer dúvida, me chame aqui. Te espero! 💅 — Jeci Vieira Nails`;
+
+          window.open(buildWhatsAppUrl(d.clientPhone, message), '_blank');
+        });
+      }
+
       list.appendChild(clone);
     });
 
@@ -328,6 +347,8 @@ async function loadConfig() {
     document.getElementById('config-hours-end').value    = d.hoursEnd     || '18:00';
     document.getElementById('config-hours-interval-start').value = d.hoursIntervalStart || '12:00';
     document.getElementById('config-hours-interval-end').value   = d.hoursIntervalEnd   || '13:00';
+    document.getElementById('config-hours-saturday-start').value = d.hoursSaturdayStart  || '09:00';
+    document.getElementById('config-hours-saturday-end').value   = d.hoursSaturdayEnd    || '13:00';
   } catch (err) {
     console.error('[admin.js] Erro ao carregar configurações:', err);
   }
@@ -348,6 +369,8 @@ document.getElementById('salon-config-form').addEventListener('submit', async (e
       hoursEnd:            document.getElementById('config-hours-end').value,
       hoursIntervalStart:  document.getElementById('config-hours-interval-start').value,
       hoursIntervalEnd:    document.getElementById('config-hours-interval-end').value,
+      hoursSaturdayStart:  document.getElementById('config-hours-saturday-start').value,
+      hoursSaturdayEnd:    document.getElementById('config-hours-saturday-end').value,
       updatedAt:           serverTimestamp(),
     });
     showToast('Configurações salvas!', 'success');

@@ -178,6 +178,23 @@
   color: var(--color-text-muted);
 }
 
+.appointment-actions {
+  flex-shrink: 0;
+}
+
+.btn-whatsapp-client {
+  font-size: var(--fs-md);
+  padding: var(--space-2);
+  border-radius: var(--radius-full);
+  transition: transform var(--transition-fast), opacity var(--transition-fast);
+  opacity: 0.7;
+}
+
+.btn-whatsapp-client:hover {
+  transform: scale(1.2);
+  opacity: 1;
+}
+
 /* Barra de ferramentas das views */
 .view-toolbar {
   display: flex;

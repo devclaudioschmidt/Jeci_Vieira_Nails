@@ -102,6 +102,12 @@
         <label for="config-hours-interval-end">Fim do intervalo (almoço)</label>
         <input id="config-hours-interval-end" type="time" name="hoursIntervalEnd" value="13:00" />
 
+        <label for="config-hours-saturday-start">Sábado — Horário de abertura</label>
+        <input id="config-hours-saturday-start" type="time" name="hoursSaturdayStart" value="09:00" />
+
+        <label for="config-hours-saturday-end">Sábado — Horário de encerramento</label>
+        <input id="config-hours-saturday-end" type="time" name="hoursSaturdayEnd" value="13:00" />
+
         <button id="btn-save-config" type="submit" class="btn-primary">Salvar</button>
       </form>
     </div>
@@ -143,6 +149,9 @@
         <p class="appointment-client"></p>
         <p class="appointment-procedure"></p>
         <p class="appointment-phone"></p>
+      </div>
+      <div class="appointment-actions">
+        <button class="btn-icon btn-whatsapp-client" aria-label="Enviar mensagem no WhatsApp" title="Enviar mensagem">📱</button>
       </div>
     </li>
   </template>
