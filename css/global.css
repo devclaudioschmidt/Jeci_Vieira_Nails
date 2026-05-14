@@ -503,6 +503,7 @@ textarea {
   font-size: var(--fs-base);
   font-weight: 600;
   text-transform: capitalize;
+  color: var(--color-text);
 }
 
 .calendar-grid {
