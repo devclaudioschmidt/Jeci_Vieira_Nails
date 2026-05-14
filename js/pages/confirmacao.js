@@ -44,6 +44,8 @@ document.getElementById('btn-confirmar-whatsapp').addEventListener('click', asyn
       createdAt: serverTimestamp(),
     });
 
+    btn.textContent = '✅ Agendado';
+
     // 2. Montar mensagem do WhatsApp (A5.6 / A5.7)
     // A CLIENTE envia esta mensagem para o SALÃO
     const dateStr = formatDatePTBR(booking.date);

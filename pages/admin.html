@@ -90,23 +90,41 @@
         <label for="config-notice">Aviso para clientes</label>
         <textarea id="config-notice" name="notice" rows="3" placeholder="Ex.: Férias em janeiro..."></textarea>
 
-        <label for="config-hours-start">Horário de abertura</label>
-        <input id="config-hours-start" type="time" name="hoursStart" value="09:00" />
+        <div class="config-row">
+          <h4 class="config-row-title">Segunda a Sexta</h4>
+          <div class="config-field">
+            <label for="config-hours-start">Abertura</label>
+            <input id="config-hours-start" type="time" name="hoursStart" value="09:00" />
+          </div>
+          <div class="config-field">
+            <label for="config-hours-end">Fechamento</label>
+            <input id="config-hours-end" type="time" name="hoursEnd" value="18:00" />
+          </div>
+        </div>
 
-        <label for="config-hours-end">Horário de encerramento</label>
-        <input id="config-hours-end" type="time" name="hoursEnd" value="18:00" />
+        <div class="config-row">
+          <h4 class="config-row-title">Intervalo (almoço)</h4>
+          <div class="config-field">
+            <label for="config-hours-interval-start">Início</label>
+            <input id="config-hours-interval-start" type="time" name="hoursIntervalStart" value="12:00" />
+          </div>
+          <div class="config-field">
+            <label for="config-hours-interval-end">Fim</label>
+            <input id="config-hours-interval-end" type="time" name="hoursIntervalEnd" value="13:00" />
+          </div>
+        </div>
 
-        <label for="config-hours-interval-start">Início do intervalo (almoço)</label>
-        <input id="config-hours-interval-start" type="time" name="hoursIntervalStart" value="12:00" />
-
-        <label for="config-hours-interval-end">Fim do intervalo (almoço)</label>
-        <input id="config-hours-interval-end" type="time" name="hoursIntervalEnd" value="13:00" />
-
-        <label for="config-hours-saturday-start">Sábado — Horário de abertura</label>
-        <input id="config-hours-saturday-start" type="time" name="hoursSaturdayStart" value="09:00" />
-
-        <label for="config-hours-saturday-end">Sábado — Horário de encerramento</label>
-        <input id="config-hours-saturday-end" type="time" name="hoursSaturdayEnd" value="13:00" />
+        <div class="config-row">
+          <h4 class="config-row-title">Sábado</h4>
+          <div class="config-field">
+            <label for="config-hours-saturday-start">Abertura</label>
+            <input id="config-hours-saturday-start" type="time" name="hoursSaturdayStart" value="09:00" />
+          </div>
+          <div class="config-field">
+            <label for="config-hours-saturday-end">Fechamento</label>
+            <input id="config-hours-saturday-end" type="time" name="hoursSaturdayEnd" value="13:00" />
+          </div>
+        </div>
 
         <button id="btn-save-config" type="submit" class="btn-primary">Salvar</button>
       </form>
@@ -141,9 +159,32 @@
     </div>
   </dialog>
 
+  <!-- ===== MODAL DE CANCELAMENTO DE AGENDAMENTO ===== -->
+  <dialog id="modal-cancel-appointment" class="app-modal" aria-labelledby="modal-cancel-title">
+    <div class="modal-content">
+      <header class="modal-header">
+        <h3 id="modal-cancel-title">Cancelar Agendamento</h3>
+        <button id="btn-close-cancel-modal" class="btn-icon" aria-label="Fechar modal">&times;</button>
+      </header>
+      <div class="modal-body">
+        <p class="modal-cancel-text">Tem certeza que deseja cancelar este agendamento?</p>
+        <div class="cancel-details">
+          <p><strong>Cliente:</strong> <span id="cancel-client-name"></span></p>
+          <p><strong>Procedimento:</strong> <span id="cancel-procedure-name"></span></p>
+          <p><strong>Data:</strong> <span id="cancel-date"></span></p>
+          <p><strong>Horário:</strong> <span id="cancel-time"></span></p>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" id="btn-cancel-no" class="btn-secondary">Voltar</button>
+        <button type="button" id="btn-cancel-yes" class="btn-primary">Sim, cancelar</button>
+      </div>
+    </div>
+  </dialog>
+
   <!-- ===== TEMPLATES ===== -->
   <template id="tpl-appointment">
-    <li class="appointment-card slide-up-anim">
+    <li class="appointment-card slide-up-anim" data-appointment-id="">
       <span class="appointment-time"></span>
       <div class="appointment-info">
         <p class="appointment-client"></p>
@@ -151,7 +192,8 @@
         <p class="appointment-phone"></p>
       </div>
       <div class="appointment-actions">
-        <button class="btn-icon btn-whatsapp-client" aria-label="Enviar mensagem no WhatsApp" title="Enviar mensagem">📱</button>
+        <button class="btn-icon btn-action-client btn-whatsapp-client" aria-label="Enviar mensagem no WhatsApp" title="Enviar mensagem">📱</button>
+        <button class="btn-icon btn-action-client btn-cancel-appointment" aria-label="Cancelar agendamento" title="Cancelar agendamento">🗑️</button>
       </div>
     </li>
   </template>

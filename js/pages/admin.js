@@ -21,6 +21,9 @@ const btnLogout    = document.getElementById('btn-logout');
 const navBtns      = document.querySelectorAll('.nav-btn');
 const adminViews   = document.querySelectorAll('.admin-view');
 
+// ---- Estado do cancelamento pendente ----
+let pendingCancel = null;
+
 // ================================================
 // AUTENTICAÇÃO
 // ================================================
@@ -33,7 +36,7 @@ onAuthStateChanged(auth, async user => {
         adminPanel.classList.remove('hidden');
         document.getElementById('admin-greeting').textContent = getGreeting();
         showView('agenda');
-        loadAgenda(new Date());
+        await loadAgenda(new Date());
       } else {
         await signOut(auth);
         loginError.textContent = 'Acesso negado. Você não é administrador.';
@@ -97,7 +100,7 @@ let selectedDate = new Date();
  * Constrói o calendário do admin e carrega agendamentos da data selecionada.
  * @param {Date} month  — primeiro dia do mês exibido
  */
-function buildAdminCalendar(month) {
+async function buildAdminCalendar(month) {
   const cal       = document.getElementById('admin-calendar');
   const year      = month.getFullYear();
   const m         = month.getMonth();
@@ -105,6 +108,25 @@ function buildAdminCalendar(month) {
   const firstDay  = new Date(year, m, 1).getDay();
   const daysIn    = new Date(year, m + 1, 0).getDate();
   const label     = month.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+
+  // Buscar datas com agendamento neste mês
+  const pad = (n) => String(n).padStart(2, '0');
+  const monthStart = `${year}-${pad(m + 1)}-01`;
+  const monthEnd   = `${year}-${pad(m + 1)}-${pad(daysIn)}`;
+
+  let datesWithAppts = new Set();
+  try {
+    const apptQuery = query(
+      collection(db, 'agendamentos'),
+      where('date', '>=', monthStart),
+      where('date', '<=', monthEnd),
+      limit(150)
+    );
+    const apptSnap = await getDocs(apptQuery);
+    apptSnap.forEach(doc => datesWithAppts.add(doc.data().date));
+  } catch (err) {
+    console.error('[admin.js] Erro ao buscar datas com agendamento:', err);
+  }
 
   const weekDays  = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
 
@@ -119,9 +141,16 @@ function buildAdminCalendar(month) {
       ${Array(firstDay).fill('<span></span>').join('')}`;
 
   for (let d = 1; d <= daysIn; d++) {
-    const date = new Date(year, m, d);
+    const date    = new Date(year, m, d);
     const isSelected = date.toDateString() === selectedDate.toDateString();
-    html += `<button class="cal-day${isSelected ? ' selected' : ''}"
+    const dateStr = `${year}-${pad(m + 1)}-${pad(d)}`;
+    const hasAppt = datesWithAppts.has(dateStr);
+
+    let classes = 'cal-day';
+    if (isSelected) classes += ' selected';
+    if (hasAppt)    classes += ' has-appointment';
+
+    html += `<button class="${classes}"
                      data-date="${date.toISOString()}"
                      aria-label="${formatDatePTBR(date)}">${d}</button>`;
   }
@@ -130,18 +159,18 @@ function buildAdminCalendar(month) {
   cal.innerHTML = html;
 
   // Eventos de navegação de mês
-  cal.querySelector('#cal-prev').addEventListener('click', () => {
-    buildAdminCalendar(new Date(year, m - 1, 1));
+  cal.querySelector('#cal-prev').addEventListener('click', async () => {
+    await buildAdminCalendar(new Date(year, m - 1, 1));
   });
-  cal.querySelector('#cal-next').addEventListener('click', () => {
-    buildAdminCalendar(new Date(year, m + 1, 1));
+  cal.querySelector('#cal-next').addEventListener('click', async () => {
+    await buildAdminCalendar(new Date(year, m + 1, 1));
   });
 
   // Seleção de dia
   cal.querySelectorAll('.cal-day').forEach(btn => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', async () => {
       selectedDate = new Date(btn.dataset.date);
-      buildAdminCalendar(new Date(year, m, 1));
+      await buildAdminCalendar(new Date(year, m, 1));
       loadAgenda(selectedDate);
     });
   });
@@ -152,7 +181,7 @@ function buildAdminCalendar(month) {
  * @param {Date} date
  */
 async function loadAgenda(date) {
-  buildAdminCalendar(date);
+  await buildAdminCalendar(date);
 
   const list    = document.getElementById('appointments-list');
   const dateStr = date.toISOString().split('T')[0];
@@ -177,7 +206,11 @@ async function loadAgenda(date) {
     
     // Ordenação em memória (JavaScript) para evitar a necessidade de Índice Composto no Firestore
     const results = [];
-    snapshot.forEach(docSnap => results.push(docSnap.data()));
+    snapshot.forEach(docSnap => {
+      const data = docSnap.data();
+      data.id = docSnap.id;
+      results.push(data);
+    });
     
     results.sort((a, b) => {
       return a.time > b.time ? 1 : -1; // Mais cedo primeiro
@@ -185,6 +218,7 @@ async function loadAgenda(date) {
 
     results.forEach(d => {
       const clone = template.content.cloneNode(true);
+      clone.querySelector('[data-appointment-id]').dataset.appointmentId = d.id;
       clone.querySelector('.appointment-time').textContent = d.time;
       clone.querySelector('.appointment-client').textContent = d.clientName;
       clone.querySelector('.appointment-procedure').textContent = d.procedureName;
@@ -205,6 +239,29 @@ async function loadAgenda(date) {
             `Qualquer dúvida, me chame aqui. Te espero! 💅 — Jeci Vieira Nails`;
 
           window.open(buildWhatsAppUrl(d.clientPhone, message), '_blank');
+        });
+      }
+
+      // Botão Cancelar: abre o modal de confirmação
+      const btnCancel = clone.querySelector('.btn-cancel-appointment');
+      if (btnCancel) {
+        btnCancel.addEventListener('click', () => {
+          pendingCancel = {
+            id: d.id,
+            clientName: d.clientName,
+            procedureName: d.procedureName,
+            date: d.date,
+            time: d.time,
+            clientPhone: d.clientPhone,
+          };
+
+          document.getElementById('cancel-client-name').textContent = d.clientName;
+          document.getElementById('cancel-procedure-name').textContent = d.procedureName;
+          const dateObj = new Date(d.date + 'T00:00:00');
+          document.getElementById('cancel-date').textContent = formatDatePTBR(dateObj);
+          document.getElementById('cancel-time').textContent = d.time;
+
+          document.getElementById('modal-cancel-appointment').showModal();
         });
       }
 
@@ -380,5 +437,58 @@ document.getElementById('salon-config-form').addEventListener('submit', async (e
   } finally {
     btn.disabled    = false;
     btn.textContent = 'Salvar';
+  }
+});
+
+// ================================================
+// MODAL DE CANCELAMENTO DE AGENDAMENTO
+// ================================================
+const modalCancel    = document.getElementById('modal-cancel-appointment');
+const btnCloseCancel = document.getElementById('btn-close-cancel-modal');
+const btnCancelNo    = document.getElementById('btn-cancel-no');
+const btnCancelYes   = document.getElementById('btn-cancel-yes');
+
+/** Fecha o modal e limpa o estado do cancelamento pendente */
+const closeCancelModal = () => {
+  pendingCancel = null;
+  modalCancel.close();
+};
+
+btnCloseCancel.addEventListener('click', closeCancelModal);
+btnCancelNo.addEventListener('click', closeCancelModal);
+
+// Confirma o cancelamento: deleta do Firestore e notifica o cliente via WhatsApp
+btnCancelYes.addEventListener('click', async () => {
+  if (!pendingCancel) return;
+
+  btnCancelYes.disabled = true;
+  btnCancelYes.textContent = 'Cancelando...';
+
+  try {
+    await deleteDoc(doc(db, 'agendamentos', pendingCancel.id));
+
+    // Remove o card da lista pelo data-appointment-id
+    document.querySelector(`[data-appointment-id="${pendingCancel.id}"]`)?.remove();
+    await buildAdminCalendar(selectedDate);
+    showToast('Agendamento cancelado.', 'success');
+
+    // Abrir WhatsApp com mensagem de cancelamento
+    const dateObj = new Date(pendingCancel.date + 'T00:00:00');
+    const cancelMessage =
+      `Olá, ${pendingCancel.clientName}.\n\n` +
+      `Infelizmente precisei *cancelar* o seu agendamento:\n` +
+      `📌 Procedimento: *${pendingCancel.procedureName}*\n` +
+      `📅 Data: *${formatDatePTBR(dateObj)}*\n` +
+      `🕐 Horário: *${pendingCancel.time}*\n\n` +
+      `Por favor, acesse o nosso aplicativo para reagendar ou me chame aqui! 💅`;
+
+    window.open(buildWhatsAppUrl(pendingCancel.clientPhone, cancelMessage), '_blank');
+  } catch (err) {
+    console.error('[admin.js] Erro ao cancelar agendamento:', err);
+    showToast('Erro ao cancelar.', 'error');
+  } finally {
+    btnCancelYes.disabled = false;
+    btnCancelYes.textContent = 'Sim, cancelar';
+    closeCancelModal();
   }
 });

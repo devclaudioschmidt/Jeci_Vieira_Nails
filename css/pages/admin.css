@@ -179,10 +179,13 @@
 }
 
 .appointment-actions {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
   flex-shrink: 0;
 }
 
-.btn-whatsapp-client {
+.btn-action-client {
   font-size: var(--fs-md);
   padding: var(--space-2);
   border-radius: var(--radius-full);
@@ -190,7 +193,7 @@
   opacity: 0.7;
 }
 
-.btn-whatsapp-client:hover {
+.btn-action-client:hover {
   transform: scale(1.2);
   opacity: 1;
 }
@@ -258,6 +261,33 @@
   margin-top: var(--space-6);
 }
 
+/* Linha com 2 campos lado a lado */
+.config-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+/* Título da linha ocupa largura total */
+.config-row-title {
+  width: 100%;
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-top: var(--space-6);
+  margin-bottom: 0;
+}
+
+/* Cada campo ocupa metade do espaço disponível */
+.config-field {
+  flex: 1 1 160px;
+  display: flex;
+  flex-direction: column;
+}
+
 
 
 #form-procedure {
@@ -284,4 +314,46 @@
   color: var(--color-text-muted);
   margin-left: 8px;
   font-size: var(--fs-sm);
+}
+
+/* ---- Modal de cancelamento de agendamento ---- */
+
+.modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.modal-cancel-text {
+  font-size: var(--fs-sm);
+  color: var(--color-text);
+}
+
+.cancel-details {
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.cancel-details p {
+  font-size: var(--fs-sm);
+  color: var(--color-text);
+}
+
+.cancel-details span {
+  color: var(--color-text-muted);
+  font-weight: 400;
+}
+
+#btn-cancel-yes {
+  background: var(--color-error);
+  color: #fff;
+}
+
+#btn-cancel-yes:hover {
+  filter: brightness(1.2);
 }

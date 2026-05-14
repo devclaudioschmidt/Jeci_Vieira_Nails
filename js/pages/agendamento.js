@@ -127,7 +127,7 @@ function buildCalendar() {
     const isSunday = date.getDay() === 0;
     const disabled = isPast || isSunday;
     html += `<button class="cal-day${disabled ? ' disabled' : ''}"
-                     data-date="${date.toISOString()}"
+                     data-year="${year}" data-month="${month}" data-day="${d}"
                      ${disabled ? 'disabled' : ''}
                      aria-label="${formatDatePTBR(date)}">
                ${d}
@@ -141,7 +141,10 @@ function buildCalendar() {
     btn.addEventListener('click', () => {
       datePicker.querySelectorAll('.cal-day').forEach(b => b.classList.remove('selected'));
       btn.classList.add('selected');
-      booking.date = new Date(btn.dataset.date);
+      const y = parseInt(btn.dataset.year);
+      const m = parseInt(btn.dataset.month);
+      const day = parseInt(btn.dataset.day);
+      booking.date = new Date(y, m, day);
       btnStep2Next.disabled = false;
     });
   });

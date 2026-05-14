@@ -523,3 +523,8 @@ textarea {
   cursor: not-allowed;
   pointer-events: none;
 }
+
+/* Destaque de datas com agendamento no calendário admin */
+.cal-day.has-appointment {
+  border-color: var(--color-primary);
+}
