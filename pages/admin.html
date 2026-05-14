@@ -65,6 +65,9 @@
       <div id="admin-calendar" class="admin-calendar" aria-label="Calendário de agendamentos">
         <!-- Gerado via JS -->
       </div>
+      <!-- Botão para agendamento manual (admin) -->
+      <button id="btn-admin-booking" class="btn-primary btn-sm btn-admin-booking">+ Agendamento Manual</button>
+
       <!-- Lista de agendamentos do dia selecionado -->
       <ul id="appointments-list" class="appointments-list" aria-label="Agendamentos do dia">
         <!-- Populado via JS -->
@@ -189,6 +192,78 @@
       <div class="modal-actions">
         <button type="button" id="btn-cancel-no" class="btn-secondary">Voltar</button>
         <button type="button" id="btn-cancel-yes" class="btn-primary">Sim, cancelar</button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- ===== MODAL DE AGENDAMENTO MANUAL (ADMIN) ===== -->
+  <dialog id="modal-admin-booking" class="app-modal admin-booking-modal" aria-labelledby="modal-booking-title">
+    <div class="modal-content">
+      <header class="modal-header">
+        <div class="header-group">
+          <h3 id="modal-booking-title">Agendamento Manual</h3>
+          <div class="admin-step-indicator">
+            <span class="admin-step active" data-step="1">1</span>
+            <span class="admin-step" data-step="2">2</span>
+            <span class="admin-step" data-step="3">3</span>
+            <span class="admin-step" data-step="4">4</span>
+          </div>
+        </div>
+        <button id="btn-close-booking-modal" class="btn-icon" aria-label="Fechar modal">&times;</button>
+      </header>
+
+      <div class="modal-body booking-flow-admin">
+        <!-- STEP 1: Procedimento -->
+        <section id="admin-step-1" class="admin-booking-step active">
+          <h4 class="step-subtitle">Qual o procedimento?</h4>
+          <ul id="admin-procedure-list" class="procedure-list">
+            <!-- Populado via JS -->
+          </ul>
+          <div class="modal-actions">
+            <button id="btn-admin-step1-next" class="btn-primary" disabled>Próximo</button>
+          </div>
+        </section>
+
+        <!-- STEP 2: Data -->
+        <section id="admin-step-2" class="admin-booking-step">
+          <h4 class="step-subtitle">Escolha a data</h4>
+          <div id="admin-date-picker" class="date-picker">
+            <!-- Calendário via JS -->
+          </div>
+          <div class="modal-actions">
+            <button id="btn-admin-step2-back" class="btn-secondary">Voltar</button>
+            <button id="btn-admin-step2-next" class="btn-primary" disabled>Próximo</button>
+          </div>
+        </section>
+
+        <!-- STEP 3: Horário -->
+        <section id="admin-step-3" class="admin-booking-step">
+          <h4 class="step-subtitle">Escolha o horário</h4>
+          <ul id="admin-time-slot-list" class="time-slot-list">
+            <!-- Horários via JS -->
+          </ul>
+          <div class="modal-actions">
+            <button id="btn-admin-step3-back" class="btn-secondary">Voltar</button>
+            <button id="btn-admin-step3-next" class="btn-primary" disabled>Próximo</button>
+          </div>
+        </section>
+
+        <!-- STEP 4: Dados da Cliente -->
+        <section id="admin-step-4" class="admin-booking-step">
+          <h4 class="step-subtitle">Dados da cliente</h4>
+          <form id="admin-client-form">
+            <label for="admin-client-name-input">Nome da cliente</label>
+            <input id="admin-client-name-input" type="text" placeholder="Nome completo" required />
+
+            <label for="admin-client-phone-input">WhatsApp</label>
+            <input id="admin-client-phone-input" type="tel" placeholder="(00) 00000-0000" required />
+
+            <div class="modal-actions">
+              <button id="btn-admin-step4-back" type="button" class="btn-secondary">Voltar</button>
+              <button id="btn-admin-confirm" type="submit" class="btn-primary">📱 Agendar</button>
+            </div>
+          </form>
+        </section>
       </div>
     </div>
   </dialog>

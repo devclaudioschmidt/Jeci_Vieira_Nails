@@ -21,6 +21,15 @@ const btnLogout    = document.getElementById('btn-logout');
 const navBtns      = document.querySelectorAll('.nav-btn');
 const adminViews   = document.querySelectorAll('.admin-view');
 
+// ---- Estado do agendamento manual (Admin) ----
+const adminBooking = {
+  procedure: null,
+  date: null,
+  time: null,
+  name: '',
+  phone: '',
+};
+
 // ---- Estado do cancelamento pendente ----
 let pendingCancel = null;
 
@@ -494,5 +503,288 @@ btnCancelYes.addEventListener('click', async () => {
     btnCancelYes.disabled = false;
     btnCancelYes.textContent = 'Sim, cancelar';
     closeCancelModal();
+  }
+});
+
+// ================================================
+// AGENDAMENTO MANUAL (ADMIN)
+// ================================================
+const modalAdminBooking = document.getElementById('modal-admin-booking');
+const btnOpenBooking    = document.getElementById('btn-admin-booking');
+const btnCloseBooking   = document.getElementById('btn-close-booking-modal');
+const adminStepDots     = document.querySelectorAll('.admin-step');
+const adminSteps        = document.querySelectorAll('.admin-booking-step');
+
+// Botões de navegação
+const btnAdminStep1Next = document.getElementById('btn-admin-step1-next');
+const btnAdminStep2Back = document.getElementById('btn-admin-step2-back');
+const btnAdminStep2Next = document.getElementById('btn-admin-step2-next');
+const btnAdminStep3Back = document.getElementById('btn-admin-step3-back');
+const btnAdminStep3Next = document.getElementById('btn-admin-step3-next');
+const btnAdminStep4Back = document.getElementById('btn-admin-step4-back');
+const adminClientForm   = document.getElementById('admin-client-form');
+
+let adminCurrentStep = 1;
+
+function goToAdminStep(n) {
+  adminSteps.forEach((s, i) => s.classList.toggle('active', i + 1 === n));
+  adminStepDots.forEach((d, i) => {
+    d.classList.toggle('active', i + 1 === n);
+    d.classList.toggle('done', i + 1 < n);
+  });
+  adminCurrentStep = n;
+}
+
+// Abrir Modal
+btnOpenBooking.addEventListener('click', () => {
+  resetAdminBooking();
+  modalAdminBooking.showModal();
+  adminLoadProcedures();
+});
+
+btnCloseBooking.addEventListener('click', () => modalAdminBooking.close());
+
+function resetAdminBooking() {
+  adminBooking.procedure = null;
+  adminBooking.date = null;
+  adminBooking.time = null;
+  adminBooking.name = '';
+  adminBooking.phone = '';
+  
+  adminClientForm.reset();
+  btnAdminStep1Next.disabled = true;
+  btnAdminStep2Next.disabled = true;
+  btnAdminStep3Next.disabled = true;
+  
+  goToAdminStep(1);
+}
+
+// STEP 1: Procedimentos
+async function adminLoadProcedures() {
+  const list = document.getElementById('admin-procedure-list');
+  list.innerHTML = '<li class="skeleton" style="height:48px;border-radius:8px;"></li>'.repeat(3);
+
+  try {
+    const q = query(collection(db, 'procedimentos'), orderBy('name'));
+    const snap = await getDocs(q);
+    list.innerHTML = '';
+
+    snap.forEach(docSnap => {
+      const data = docSnap.data();
+      const li = document.createElement('li');
+      li.className = 'procedure-item';
+      li.innerHTML = `
+        <span class="procedure-name">${data.name}</span>
+        ${data.price ? `<span class="procedure-price">R$ ${Number(data.price).toFixed(2)}</span>` : ''}
+      `;
+      li.addEventListener('click', () => {
+        list.querySelectorAll('.procedure-item').forEach(el => el.classList.remove('selected'));
+        li.classList.add('selected');
+        adminBooking.procedure = { id: docSnap.id, ...data };
+        btnAdminStep1Next.disabled = false;
+      });
+      list.appendChild(li);
+    });
+  } catch (err) {
+    console.error('[admin.js] Erro ao carregar procedimentos:', err);
+  }
+}
+
+btnAdminStep1Next.addEventListener('click', () => {
+  goToAdminStep(2);
+  adminBuildCalendar();
+});
+
+// STEP 2: Calendário
+function adminBuildCalendar() {
+  const container = document.getElementById('admin-date-picker');
+  const today = new Date(); today.setHours(0,0,0,0);
+  const year = today.getFullYear();
+  const month = today.getMonth();
+
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysIn = new Date(year, month + 1, 0).getDate();
+  const monthLabel = today.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+
+  let html = `<p class="calendar-month">${monthLabel}</p>
+    <div class="calendar-grid">
+      ${['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'].map(d => `<span class="cal-header">${d}</span>`).join('')}
+      ${Array(firstDay).fill('<span></span>').join('')}`;
+
+  for (let d = 1; d <= daysIn; d++) {
+    const date = new Date(year, month, d);
+    const isPast = date < today;
+    const isSunday = date.getDay() === 0;
+    const disabled = isPast || isSunday;
+    
+    html += `<button class="cal-day${disabled ? ' disabled' : ''}" 
+                     data-year="${year}" data-month="${month}" data-day="${d}"
+                     ${disabled ? 'disabled' : ''}>${d}</button>`;
+  }
+  html += '</div>';
+  container.innerHTML = html;
+
+  container.querySelectorAll('.cal-day:not(.disabled)').forEach(btn => {
+    btn.addEventListener('click', () => {
+      container.querySelectorAll('.cal-day').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      adminBooking.date = new Date(btn.dataset.year, btn.dataset.month, btn.dataset.day);
+      btnAdminStep2Next.disabled = false;
+    });
+  });
+}
+
+btnAdminStep2Back.addEventListener('click', () => goToAdminStep(1));
+btnAdminStep2Next.addEventListener('click', async () => {
+  btnAdminStep2Next.disabled = true;
+  btnAdminStep2Next.textContent = 'Carregando...';
+  await adminBuildTimeSlots();
+  btnAdminStep2Next.disabled = false;
+  btnAdminStep2Next.textContent = 'Próximo';
+  goToAdminStep(3);
+});
+
+// STEP 3: Horários
+async function adminBuildTimeSlots() {
+  const list = document.getElementById('admin-time-slot-list');
+  list.innerHTML = '<li class="skeleton" style="height:40px;border-radius:8px;"></li>'.repeat(3);
+
+  try {
+    const configSnap = await getDoc(doc(db, 'configuracoes', 'salao'));
+    const config = configSnap.exists() ? configSnap.data() : {};
+    
+    const isSaturday = adminBooking.date.getDay() === 6;
+    let hStart, hEnd, iStart, iEnd;
+
+    if (isSaturday) {
+      hStart = config.hoursSaturdayStart || '09:00';
+      hEnd   = config.hoursSaturdayEnd   || '13:00';
+      iStart = null; iEnd = null;
+    } else {
+      hStart = config.hoursStart || '09:00';
+      hEnd   = config.hoursEnd   || '18:00';
+      iStart = config.hoursIntervalStart || '12:00';
+      iEnd   = config.hoursIntervalEnd   || '13:00';
+    }
+
+    const toMin = t => { if(!t) return 0; const [h,m] = t.split(':').map(Number); return h*60+m; };
+    const toStr = m => { const h=Math.floor(m/60).toString().padStart(2,'0'); const min=(m%60).toString().padStart(2,'0'); return `${h}:${min}`; };
+
+    const startMin = toMin(hStart);
+    const endMin   = toMin(hEnd);
+    const intStart = iStart ? toMin(iStart) : null;
+    const intEnd   = iEnd ? toMin(iEnd) : null;
+
+    const y = adminBooking.date.getFullYear();
+    const m = String(adminBooking.date.getMonth() + 1).padStart(2, '0');
+    const d = String(adminBooking.date.getDate()).padStart(2, '0');
+    const dateStr = `${y}-${m}-${d}`;
+
+    const q = query(collection(db, 'agendamentos'), where('date', '==', dateStr));
+    const snap = await getDocs(q);
+    const appointments = [];
+    snap.forEach(doc => {
+      const data = doc.data();
+      const s = toMin(data.time);
+      const dur = data.procedureDuration || 60;
+      appointments.push({ start: s, end: s + dur });
+    });
+
+    const duration = adminBooking.procedure.duration || 60;
+    const slots = [];
+
+    for (let curr = startMin; curr <= endMin - duration; curr += 30) {
+      const sEnd = curr + duration;
+      if (sEnd > endMin) continue;
+      if (intStart !== null && Math.max(curr, intStart) < Math.min(sEnd, intEnd)) continue;
+      
+      let conflict = false;
+      for (const appt of appointments) {
+        if (Math.max(curr, appt.start) < Math.min(sEnd, appt.end)) { conflict = true; break; }
+      }
+
+      // Validação de horário passado (hoje)
+      const now = new Date();
+      if (dateStr === `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`) {
+        const nowMin = now.getHours() * 60 + now.getMinutes();
+        if (curr <= nowMin) conflict = true;
+      }
+
+      if (!conflict) slots.push(toStr(curr));
+    }
+
+    list.innerHTML = slots.length ? slots.map(t => `<li class="time-slot" data-time="${t}">${t}</li>`).join('') 
+                                  : '<li style="grid-column: 1/-1; text-align:center; color:var(--color-text-muted);">Sem horários disponíveis.</li>';
+
+    list.querySelectorAll('.time-slot').forEach(el => {
+      el.addEventListener('click', () => {
+        list.querySelectorAll('.time-slot').forEach(s => s.classList.remove('selected'));
+        el.classList.add('selected');
+        adminBooking.time = el.dataset.time;
+        btnAdminStep3Next.disabled = false;
+      });
+    });
+  } catch (err) {
+    console.error('[admin.js] Erro slots:', err);
+  }
+}
+
+btnAdminStep3Back.addEventListener('click', () => goToAdminStep(2));
+btnAdminStep3Next.addEventListener('click', () => {
+  goToAdminStep(4);
+  import('../global.js').then(m => m.applyPhoneMask(document.getElementById('admin-client-phone-input')));
+});
+
+// STEP 4: Confirmação
+btnAdminStep4Back.addEventListener('click', () => goToAdminStep(3));
+
+adminClientForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const name = document.getElementById('admin-client-name-input').value.trim();
+  const phone = document.getElementById('admin-client-phone-input').value.trim();
+  const btn = document.getElementById('btn-admin-confirm');
+
+  if (name.length < 3) return showToast('Nome muito curto', 'error');
+  if (phone.replace(/\D/g,'').length < 10) return showToast('Telefone inválido', 'error');
+
+  btn.disabled = true;
+  btn.textContent = 'Agendando...';
+
+  try {
+    const y = adminBooking.date.getFullYear();
+    const m = String(adminBooking.date.getMonth() + 1).padStart(2, '0');
+    const d = String(adminBooking.date.getDate()).padStart(2, '0');
+    const dateStr = `${y}-${m}-${d}`;
+
+    await addDoc(collection(db, 'agendamentos'), {
+      procedureId: adminBooking.procedure.id,
+      procedureName: adminBooking.procedure.name,
+      procedureDuration: adminBooking.procedure.duration,
+      price: adminBooking.procedure.price,
+      date: dateStr,
+      time: adminBooking.time,
+      clientName: name,
+      clientPhone: phone.replace(/\D/g, ''),
+      status: 'confirmado',
+      bookedBy: 'admin',
+      createdAt: serverTimestamp()
+    });
+
+    showToast('Agendamento realizado!', 'success');
+    modalAdminBooking.close();
+    loadAgenda(selectedDate); // Recarrega a lista do dia selecionado no painel
+
+    // Notificar cliente via WhatsApp
+    const dateFormatted = formatDatePTBR(adminBooking.date);
+    const message = `Olá, ${name}! 😊\n\nSeu agendamento foi confirmado:\n📌 Procedimento: *${adminBooking.procedure.name}*\n📅 Data: *${dateFormatted}*\n🕐 Horário: *${adminBooking.time}*\n\nTe espero! 💅 — Jeci Vieira Nails`;
+    
+    window.open(buildWhatsAppUrl(phone, message), '_blank');
+
+  } catch (err) {
+    console.error('[admin.js] Erro ao agendar admin:', err);
+    showToast('Erro ao realizar agendamento', 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '📱 Agendar e Avisar Cliente';
   }
 });
