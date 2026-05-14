@@ -2,7 +2,7 @@
 // agendamento.js — Fluxo de Agendamento (A5.1–A5.4)
 // ================================================
 import { db } from '../firebase/config.js';
-import { collection, getDocs, query, orderBy } from 'https://www.gstatic.com/firebasejs/11.7.1/firebase-firestore.js';
+import { collection, getDocs, query, orderBy, doc, getDoc, where } from 'https://www.gstatic.com/firebasejs/11.7.1/firebase-firestore.js';
 import { applyPhoneMask, formatDatePTBR, showToast } from '../global.js';
 
 // ---- Estado da sessão de agendamento ----
@@ -147,27 +147,142 @@ function buildCalendar() {
   });
 }
 
-btnStep2Next.addEventListener('click', () => { buildTimeSlots(); goToStep(3); });
+btnStep2Next.addEventListener('click', async () => { 
+  const btn = btnStep2Next;
+  btn.disabled = true;
+  const originalText = btn.textContent;
+  btn.textContent = 'Carregando...';
+  
+  await buildTimeSlots(); 
+  
+  btn.disabled = false;
+  btn.textContent = originalText;
+  goToStep(3); 
+});
 btnStep2Back.addEventListener('click', () => goToStep(1));
 
 // ---- STEP 3: Horários disponíveis ----
-function buildTimeSlots() {
-  // Horários padrão — futuramente virão das configurações do salão
-  const slots = ['09:00', '09:30', '10:00', '10:30', '11:00', '11:30',
-    '14:00', '14:30', '15:00', '15:30', '16:00', '16:30', '17:00', '17:30'];
+async function buildTimeSlots() {
+  timeSlotList.innerHTML = '<li class="skeleton" style="height:48px;border-radius:12px;margin-bottom:8px;"></li>'.repeat(4);
 
-  timeSlotList.innerHTML = slots.map(t =>
-    `<li class="time-slot" data-time="${t}">${t}</li>`
-  ).join('');
+  try {
+    // 1. Obter config do salão
+    const docSnap = await getDoc(doc(db, 'configuracoes', 'salao'));
+    const config = docSnap.exists() ? docSnap.data() : {};
+    
+    const hStart = config.hoursStart || '09:00';
+    const hEnd   = config.hoursEnd   || '18:00';
+    const intStart = config.hoursIntervalStart || '12:00';
+    const intEnd   = config.hoursIntervalEnd   || '13:00';
 
-  timeSlotList.querySelectorAll('.time-slot').forEach(el => {
-    el.addEventListener('click', () => {
-      timeSlotList.querySelectorAll('.time-slot').forEach(s => s.classList.remove('selected'));
-      el.classList.add('selected');
-      booking.time = el.dataset.time;
-      btnStep3Next.disabled = false;
+    // Helper: "HH:MM" -> minutos
+    const toMin = (t) => {
+      if (!t) return 0;
+      const [h, m] = t.split(':').map(Number);
+      return h * 60 + m;
+    };
+
+    // Helper: minutos -> "HH:MM"
+    const toTimeStr = (m) => {
+      const h = Math.floor(m / 60).toString().padStart(2, '0');
+      const min = (m % 60).toString().padStart(2, '0');
+      return `${h}:${min}`;
+    };
+
+    const startMin = toMin(hStart);
+    const endMin   = toMin(hEnd);
+    const iStart   = toMin(intStart);
+    const iEnd     = toMin(intEnd);
+
+    // 2. Obter agendamentos do dia selecionado
+    // Formatar data localmente para evitar bugs de TimeZone com toISOString()
+    const y = booking.date.getFullYear();
+    const m = String(booking.date.getMonth() + 1).padStart(2, '0');
+    const dStr = String(booking.date.getDate()).padStart(2, '0');
+    const dateStr = `${y}-${m}-${dStr}`;
+    
+    const q = query(collection(db, 'agendamentos'), where('date', '==', dateStr));
+    const snap = await getDocs(q);
+
+    const appointments = [];
+    snap.forEach(d => {
+      const data = d.data();
+      const aStart = toMin(data.time);
+      const aDur   = data.procedureDuration || 60; // Fallback para agendamentos antigos
+      appointments.push({ start: aStart, end: aStart + aDur });
     });
-  });
+
+    const duration = booking.procedure?.duration || 60;
+    
+    // 3. Gerar slots de 30 em 30 min e filtrar
+    const availableSlots = [];
+    
+    for (let currentM = startMin; currentM <= endMin - duration; currentM += 30) {
+      const slotStart = currentM;
+      const slotEnd   = currentM + duration;
+
+      // 3.1 Checar se passa do fim do expediente
+      if (slotEnd > endMin) continue;
+
+      // 3.2 Checar se conflita com o intervalo de almoço
+      // Intersecção de [slotStart, slotEnd] com [iStart, iEnd]
+      if (Math.max(slotStart, iStart) < Math.min(slotEnd, iEnd)) {
+        continue;
+      }
+
+      // 3.3 Checar se conflita com agendamentos existentes
+      let hasConflict = false;
+      for (const appt of appointments) {
+        if (Math.max(slotStart, appt.start) < Math.min(slotEnd, appt.end)) {
+          hasConflict = true;
+          break;
+        }
+      }
+
+      // 3.4 Checar se o horário já passou (no dia de hoje)
+      const today = new Date();
+      const todayY = today.getFullYear();
+      const todayM = String(today.getMonth() + 1).padStart(2, '0');
+      const todayD = String(today.getDate()).padStart(2, '0');
+      const todayStr = `${todayY}-${todayM}-${todayD}`;
+      
+      if (dateStr === todayStr) {
+        const nowMin = today.getHours() * 60 + today.getMinutes();
+        if (slotStart <= nowMin) {
+          hasConflict = true; 
+        }
+      }
+
+      if (!hasConflict) {
+        availableSlots.push(toTimeStr(slotStart));
+      }
+    }
+
+    // 4. Renderizar horários disponíveis
+    if (availableSlots.length === 0) {
+      timeSlotList.innerHTML = `<li style="color:var(--color-text-muted);text-align:center;padding:1rem;">Nenhum horário disponível neste dia.</li>`;
+      btnStep3Next.disabled = true;
+      return;
+    }
+
+    timeSlotList.innerHTML = availableSlots.map(t =>
+      `<li class="time-slot" data-time="${t}">${t}</li>`
+    ).join('');
+
+    timeSlotList.querySelectorAll('.time-slot').forEach(el => {
+      el.addEventListener('click', () => {
+        timeSlotList.querySelectorAll('.time-slot').forEach(s => s.classList.remove('selected'));
+        el.classList.add('selected');
+        booking.time = el.dataset.time;
+        btnStep3Next.disabled = false;
+      });
+    });
+
+  } catch (error) {
+    console.error('[agendamento.js] Erro ao buscar horários:', error);
+    showToast('Erro ao carregar horários.', 'error');
+    timeSlotList.innerHTML = `<li style="color:var(--color-error);text-align:center;padding:1rem;">Falha ao carregar. Tente novamente.</li>`;
+  }
 }
 
 btnStep3Next.addEventListener('click', () => goToStep(4));

@@ -326,6 +326,8 @@ async function loadConfig() {
     document.getElementById('config-notice').value       = d.notice       || '';
     document.getElementById('config-hours-start').value  = d.hoursStart   || '09:00';
     document.getElementById('config-hours-end').value    = d.hoursEnd     || '18:00';
+    document.getElementById('config-hours-interval-start').value = d.hoursIntervalStart || '12:00';
+    document.getElementById('config-hours-interval-end').value   = d.hoursIntervalEnd   || '13:00';
   } catch (err) {
     console.error('[admin.js] Erro ao carregar configurações:', err);
   }
@@ -342,9 +344,11 @@ document.getElementById('salon-config-form').addEventListener('submit', async (e
       phone:      document.getElementById('config-phone').value.trim(),
       address:    document.getElementById('config-address').value.trim(),
       notice:     document.getElementById('config-notice').value.trim(),
-      hoursStart: document.getElementById('config-hours-start').value,
-      hoursEnd:   document.getElementById('config-hours-end').value,
-      updatedAt:  serverTimestamp(),
+      hoursStart:          document.getElementById('config-hours-start').value,
+      hoursEnd:            document.getElementById('config-hours-end').value,
+      hoursIntervalStart:  document.getElementById('config-hours-interval-start').value,
+      hoursIntervalEnd:    document.getElementById('config-hours-interval-end').value,
+      updatedAt:           serverTimestamp(),
     });
     showToast('Configurações salvas!', 'success');
   } catch (err) {

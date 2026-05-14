@@ -32,9 +32,10 @@ document.getElementById('btn-confirmar-whatsapp').addEventListener('click', asyn
   try {
     // 1. Persistir no Firestore
     await addDoc(collection(db, 'agendamentos'), {
-      procedureId:   booking.procedure?.id   ?? null,
-      procedureName: booking.procedure?.name ?? '',
-      price:         booking.procedure?.price ?? null,
+      procedureId:       booking.procedure?.id       ?? null,
+      procedureName:     booking.procedure?.name     ?? '',
+      procedureDuration: booking.procedure?.duration ?? 60,
+      price:             booking.procedure?.price    ?? null,
       date:          booking.date.toISOString().split('T')[0],  // "YYYY-MM-DD"
       time:          booking.time,
       clientName:    booking.name,
