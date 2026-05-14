@@ -2,29 +2,29 @@
 // sw.js — Service Worker (PWA)
 // ================================================
 
-const CACHE_NAME = 'jeci-nails-v1';
+const CACHE_NAME = 'jeci-nails-v2';
 
 const urlsToCache = [
-  '/',
-  '/index.html',
-  'pages/agendamento.html',
-  'pages/confirmacao.html',
-  'pages/admin.html',
-  'css/global.css',
-  'css/pages/index.css',
-  'css/pages/agendamento.css',
-  'css/pages/confirmacao.css',
-  'css/pages/admin.css',
-  'js/global.js',
-  'js/firebase/config.js',
-  'js/pages/index.js',
-  'js/pages/agendamento.js',
-  'js/pages/confirmacao.js',
-  'js/pages/admin.js',
-  'img/logoJeciVieira.svg',
-  'img/icon-192.png',
-  'img/icon-512.png',
-  'manifest.json',
+  '/Jeci_Vieira_Nails/',
+  '/Jeci_Vieira_Nails/index.html',
+  '/Jeci_Vieira_Nails/pages/agendamento.html',
+  '/Jeci_Vieira_Nails/pages/confirmacao.html',
+  '/Jeci_Vieira_Nails/pages/admin.html',
+  '/Jeci_Vieira_Nails/css/global.css',
+  '/Jeci_Vieira_Nails/css/pages/index.css',
+  '/Jeci_Vieira_Nails/css/pages/agendamento.css',
+  '/Jeci_Vieira_Nails/css/pages/confirmacao.css',
+  '/Jeci_Vieira_Nails/css/pages/admin.css',
+  '/Jeci_Vieira_Nails/js/global.js',
+  '/Jeci_Vieira_Nails/js/firebase/config.js',
+  '/Jeci_Vieira_Nails/js/pages/index.js',
+  '/Jeci_Vieira_Nails/js/pages/agendamento.js',
+  '/Jeci_Vieira_Nails/js/pages/confirmacao.js',
+  '/Jeci_Vieira_Nails/js/pages/admin.js',
+  '/Jeci_Vieira_Nails/img/logoJeciVieira.svg',
+  '/Jeci_Vieira_Nails/img/icon-192.png',
+  '/Jeci_Vieira_Nails/img/icon-512.png',
+  '/Jeci_Vieira_Nails/manifest.json',
 ];
 
 self.addEventListener('install', (event) => {
@@ -72,7 +72,7 @@ self.addEventListener('fetch', (event) => {
           })
           .catch(() => {
             if (event.request.mode === 'navigate') {
-              return caches.match('index.html');
+              return caches.match('/Jeci_Vieira_Nails/index.html');
             }
             return new Response('Offline', { status: 503 });
           });
