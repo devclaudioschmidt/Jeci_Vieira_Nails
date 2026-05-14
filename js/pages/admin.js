@@ -252,7 +252,7 @@ async function loadAgenda(date) {
             `🕐 Horário: *${d.time}*\n\n` +
             `Qualquer dúvida, me chame aqui. Te espero! 💅 — Jeci Vieira Nails`;
 
-          window.open(buildWhatsAppUrl(d.clientPhone, message), '_blank');
+          window.location.href = buildWhatsAppUrl(d.clientPhone, message);
         });
       }
 
@@ -500,7 +500,7 @@ btnCancelYes.addEventListener('click', async () => {
       `🕐 Horário: *${pendingCancel.time}*\n\n` +
       `Por favor, acesse o nosso aplicativo para reagendar ou me chame aqui! 💅`;
 
-    window.open(buildWhatsAppUrl(pendingCancel.clientPhone, cancelMessage), '_blank');
+    window.location.href = buildWhatsAppUrl(pendingCancel.clientPhone, cancelMessage);
   } catch (err) {
     console.error('[admin.js] Erro ao cancelar agendamento:', err);
     showToast('Erro ao cancelar.', 'error');
@@ -783,7 +783,7 @@ adminClientForm.addEventListener('submit', async (e) => {
     const dateFormatted = formatDatePTBR(adminBooking.date);
     const message = `Olá, ${name}! 😊\n\nSeu agendamento foi confirmado:\n📌 Procedimento: *${adminBooking.procedure.name}*\n📅 Data: *${dateFormatted}*\n🕐 Horário: *${adminBooking.time}*\n\nTe espero! 💅 — Jeci Vieira Nails`;
     
-    window.open(buildWhatsAppUrl(phone, message), '_blank');
+    window.location.href = buildWhatsAppUrl(phone, message);
 
   } catch (err) {
     console.error('[admin.js] Erro ao agendar admin:', err);
