@@ -5,8 +5,8 @@
 const CACHE_NAME = 'jeci-nails-v1';
 
 const urlsToCache = [
-  '.',
-  'index.html',
+  '/',
+  '/index.html',
   'pages/agendamento.html',
   'pages/confirmacao.html',
   'pages/admin.html',
