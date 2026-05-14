@@ -26,7 +26,7 @@ async function loadSalonInfo() {
     const elAddress = document.getElementById('salon-address');
     const elNotice  = document.getElementById('salon-notice');
 
-    if (elPhone)   elPhone.textContent   = phone   || '';
+    if (elPhone)   elPhone.textContent   = 'WhatsApp: ' + (phone || '');
     if (elAddress) elAddress.textContent = address || '';
     if (elNotice) {
       elNotice.textContent = notice || '';
