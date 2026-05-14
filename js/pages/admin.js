@@ -305,6 +305,7 @@ async function loadProceduresAdmin() {
         editBtn.addEventListener('click', () => {
           document.getElementById('procedure-id').value = docSnap.id;
           document.getElementById('procedure-name').value = d.name;
+          document.getElementById('procedure-category').value = d.category || 'Manicure e Pedicure';
           document.getElementById('procedure-price').value = d.price || '';
           document.getElementById('procedure-duration').value = d.duration || 60;
           document.getElementById('modal-title').textContent = 'Editar Procedimento';
@@ -331,6 +332,7 @@ const btnCancelModal = document.getElementById('btn-cancel-modal');
 document.getElementById('btn-add-procedure').addEventListener('click', () => {
   formProcedure.reset();
   document.getElementById('procedure-id').value = '';
+  document.getElementById('procedure-category').value = 'Manicure e Pedicure';
   document.getElementById('modal-title').textContent = 'Novo Procedimento';
   modalProcedure.showModal();
 });
@@ -343,11 +345,13 @@ formProcedure.addEventListener('submit', async (e) => {
   e.preventDefault();
   const id       = document.getElementById('procedure-id').value;
   const name     = document.getElementById('procedure-name').value.trim();
+  const category = document.getElementById('procedure-category').value;
   const price    = document.getElementById('procedure-price').value;
   const duration = document.getElementById('procedure-duration').value;
 
   const data = {
     name,
+    category,
     price:    price    ? parseFloat(price)    : null,
     duration: duration ? parseInt(duration)   : 60,
     updatedAt: serverTimestamp(),

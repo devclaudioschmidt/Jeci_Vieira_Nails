@@ -150,6 +150,12 @@
         <label for="procedure-name">Nome do procedimento</label>
         <input type="text" id="procedure-name" name="name" required placeholder="Ex.: Manicure Simples" />
 
+        <label for="procedure-category">Categoria</label>
+        <select id="procedure-category" name="category" required>
+          <option value="Manicure e Pedicure">Manicure e Pedicure</option>
+          <option value="Podologia">Podologia</option>
+        </select>
+
         <label for="procedure-price">Preço (R$)</label>
         <input type="number" id="procedure-price" name="price" step="0.01" min="0" placeholder="Ex.: 45.00" />
 

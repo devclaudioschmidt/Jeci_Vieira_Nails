@@ -54,34 +54,80 @@ function goToStep(n) {
 
 // ---- STEP 1: Carregar procedimentos do Firestore ----
 async function loadProcedures() {
-  procedureList.innerHTML = '<li class="skeleton" style="height:56px;border-radius:12px;"></li>'.repeat(3);
+  procedureList.innerHTML = '<div class="skeleton" style="height:56px;border-radius:12px;margin-bottom:16px;"></div>'.repeat(3);
 
   try {
     const q = query(collection(db, 'procedimentos'), orderBy('name'));
     const snapshot = await getDocs(q);
 
     if (snapshot.empty) {
-      procedureList.innerHTML = '<li style="color:var(--color-text-muted);text-align:center;padding:1rem;">Nenhum procedimento cadastrado.</li>';
+      procedureList.innerHTML = '<p style="color:var(--color-text-muted);text-align:center;padding:1rem;">Nenhum procedimento cadastrado.</p>';
       return;
     }
 
     procedureList.innerHTML = '';
 
+    const categories = {
+      'Manicure e Pedicure': [],
+      'Podologia': [],
+      'Outros': []
+    };
+
     snapshot.forEach(docSnap => {
       const data = docSnap.data();
-      const li = document.createElement('li');
-      li.className = 'procedure-item';
-      li.dataset.id = docSnap.id;
-      li.dataset.name = data.name;
-      li.dataset.price = data.price ?? '';
-      li.dataset.duration = data.duration ?? 60;
-      li.innerHTML = `
-        <span class="procedure-name">${data.name}</span>
-        ${data.price ? `<span class="procedure-price">R$ ${Number(data.price).toFixed(2)}</span>` : ''}
-      `;
-      li.addEventListener('click', () => selectProcedure(li));
-      procedureList.appendChild(li);
+      const cat = data.category || 'Manicure e Pedicure';
+      if (!categories[cat]) categories[cat] = [];
+      categories[cat].push({ id: docSnap.id, ...data });
     });
+
+    for (const [catName, procs] of Object.entries(categories)) {
+      if (procs.length === 0) continue;
+
+      const group = document.createElement('div');
+      group.className = 'category-group slide-up-anim';
+
+      const header = document.createElement('button');
+      header.className = 'category-header';
+      header.innerHTML = `
+        ${catName}
+        <span class="category-icon">&#9660;</span>
+      `;
+
+      const content = document.createElement('ul');
+      content.className = 'category-content procedure-list';
+
+      procs.forEach(data => {
+        const li = document.createElement('li');
+        li.className = 'procedure-item';
+        li.dataset.id = data.id;
+        li.dataset.name = data.name;
+        li.dataset.price = data.price ?? '';
+        li.dataset.duration = data.duration ?? 60;
+        li.innerHTML = `
+          <span class="procedure-name">${data.name}</span>
+          ${data.price ? `<span class="procedure-price">R$ ${Number(data.price).toFixed(2)}</span>` : ''}
+        `;
+        li.addEventListener('click', () => selectProcedure(li));
+        content.appendChild(li);
+      });
+
+      header.addEventListener('click', () => {
+        const isExpanded = header.classList.contains('expanded');
+        // Fecha todos
+        document.querySelectorAll('.category-header').forEach(h => h.classList.remove('expanded'));
+        document.querySelectorAll('.category-content').forEach(c => c.classList.remove('expanded'));
+        
+        // Abre o clicado se não estava aberto
+        if (!isExpanded) {
+          header.classList.add('expanded');
+          content.classList.add('expanded');
+        }
+      });
+
+      group.appendChild(header);
+      group.appendChild(content);
+      procedureList.appendChild(group);
+    }
 
   } catch (err) {
     console.error('[agendamento.js] Erro ao carregar procedimentos:', err);
