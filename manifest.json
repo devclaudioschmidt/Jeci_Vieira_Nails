@@ -1,0 +1,16 @@
+{
+  "name": "Jeci Vieira Nails",
+  "short_name": "Jeci Nails",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0E0D0D",
+  "theme_color": "#0E0D0D",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "img/logoJeciVieira.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
