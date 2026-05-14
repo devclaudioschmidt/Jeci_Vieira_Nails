@@ -106,6 +106,17 @@
   <script type="module" src="js/global.js"></script>
   <script type="module" src="js/pages/index.js"></script>
 
+  <!-- Registro do Service Worker -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+          .then(() => console.log('[SW] Registrado com sucesso'))
+          .catch((err) => console.warn('[SW] Erro ao registrar:', err));
+      });
+    }
+  </script>
+
 </body>
 
 </html>
