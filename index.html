@@ -7,16 +7,10 @@
   <meta name="description" content="Agende seu horário na Jeci Vieira Nails — nail designer profissional." />
   <title>Jeci Vieira Nails — Agendamento</title>
 
-  <!-- Web App / PWA Config -->
-  <link rel="manifest" href="manifest.json" />
-  <link rel="icon" type="image/png" href="img/icon-192.png" />
+  <!-- Ícones e Cores (Para atalho na tela inicial) -->
+  <link rel="icon" type="image/png" href="img/favicon.png" />
+  <link rel="apple-touch-icon" href="img/favicon.png" />
   <meta name="theme-color" content="#0E0D0D" />
-  
-  <!-- iOS Web App Config -->
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="Jeci Nails" />
-  <link rel="apple-touch-icon" href="img/logoJeciVieira.svg" />
 
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -109,13 +103,15 @@
   <script type="module" src="js/global.js"></script>
   <script type="module" src="js/pages/index.js"></script>
 
-  <!-- Registro do Service Worker -->
+  <!-- Limpeza de Service Workers (Remoção do PWA) -->
   <script>
     if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('sw.js')
-          .then(() => console.log('[SW] Registrado com sucesso'))
-          .catch((err) => console.warn('[SW] Erro ao registrar:', err));
+      navigator.serviceWorker.getRegistrations().then(registrations => {
+        for (const registration of registrations) {
+          registration.unregister().then(() => {
+            console.log('[PWA] Service Worker removido com sucesso');
+          });
+        }
       });
     }
   </script>
