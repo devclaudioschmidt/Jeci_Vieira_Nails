@@ -449,6 +449,30 @@ textarea {
   color: hsl(340, 20%, 8%);
 }
 
+/* Botão fechar dos modais — círculo vermelho padronizado */
+.modal-header .btn-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--color-error);
+  color: #fff;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform var(--transition-fast), filter var(--transition-fast);
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.modal-header .btn-icon:hover {
+  transform: scale(1.1);
+  filter: brightness(1.2);
+}
+
 /* --- 9. Calendário (compartilhado entre páginas) --- */
 
 .cal-nav {

@@ -247,32 +247,9 @@
   transition: color var(--transition-fast);
 }
 
-.btn-icon:hover { color: var(--color-primary); }
 .btn-icon.delete:hover { color: var(--color-error); }
 
-/* Botão fechar do modal — estilo padrão circular vermelho */
-#btn-close-modal {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: var(--color-error);
-  color: #fff;
-  border: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.1rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: transform 150ms ease, filter 150ms ease;
-  line-height: 1;
-  flex-shrink: 0;
-}
 
-#btn-close-modal:hover {
-  transform: scale(1.1);
-  filter: brightness(1.2);
-}
 
 /* Configurações */
 #view-configuracoes h3 {

@@ -151,16 +151,21 @@ async function buildAdminCalendar(month) {
 
   for (let d = 1; d <= daysIn; d++) {
     const date    = new Date(year, m, d);
+    const isPast  = date < today;
+    const isSunday = date.getDay() === 0;
+    const isDisabled = isPast || isSunday;
     const isSelected = date.toDateString() === selectedDate.toDateString();
     const dateStr = `${year}-${pad(m + 1)}-${pad(d)}`;
     const hasAppt = datesWithAppts.has(dateStr);
 
     let classes = 'cal-day';
-    if (isSelected) classes += ' selected';
-    if (hasAppt)    classes += ' has-appointment';
+    if (isDisabled)  classes += ' disabled';
+    if (isSelected)  classes += ' selected';
+    if (hasAppt)     classes += ' has-appointment';
 
     html += `<button class="${classes}"
                      data-date="${date.toISOString()}"
+                     ${isDisabled ? 'disabled' : ''}
                      aria-label="${formatDatePTBR(date)}">${d}</button>`;
   }
 
