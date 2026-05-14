@@ -61,12 +61,17 @@ document.getElementById('btn-confirmar-whatsapp').addEventListener('click', asyn
     // 3. Limpar sessionStorage
     sessionStorage.removeItem('booking');
 
-    // 4. Abrir WhatsApp com mensagem para o SALÃO
-    // A cliente envia a confirmação para o número da Jeci Vieira Nails
+    // 4. Mostrar feedback e redirecionar para o WhatsApp
+    // Usamos window.location.href para garantir compatibilidade com mobile e evitar bloqueios de pop-up
+    showToast('Agendamento confirmado! Redirecionando...', 'success');
+    
     const SALON_WHATSAPP = '5547997064072';
-    window.open(buildWhatsAppUrl(SALON_WHATSAPP, message), '_blank');
-
-    showToast('Agendamento confirmado! 🎉', 'success');
+    const whatsappUrl = buildWhatsAppUrl(SALON_WHATSAPP, message);
+    
+    // Pequeno delay para o usuário ver o feedback antes da transição de app
+    setTimeout(() => {
+      window.location.href = whatsappUrl;
+    }, 800);
 
   } catch (err) {
     console.error('[confirmacao.js] Erro ao salvar agendamento:', err);

@@ -33,7 +33,7 @@ async function loadSalonInfo() {
 
       const elNoticeBoard = elNotice.closest('.notice-board');
       if (elNoticeBoard) {
-        elNoticeBoard.style.display = notice ? '' : 'none';
+        elNoticeBoard.classList.toggle('hidden', !notice);
       }
     }
 
@@ -127,7 +127,7 @@ formSearch.addEventListener('submit', async (e) => {
   } catch (error) {
     console.error('[index.js] Erro na busca de agendamentos:', error);
     showToast('Erro ao buscar agendamentos. Verifique sua conexão.', 'error');
-    searchResultsList.innerHTML = `<li class="empty-state-msg slide-up-anim" style="color: var(--color-error);">Falha ao carregar dados.</li>`;
+    searchResultsList.innerHTML = `<li class="empty-state-msg slide-up-anim error-msg">Falha ao carregar dados.</li>`;
   } finally {
     btnSubmitSearch.disabled = false;
     btnSubmitSearch.textContent = 'Buscar';

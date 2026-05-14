@@ -55,6 +55,22 @@
   animation: fadeInUp var(--transition-slow) 500ms both;
 }
 
+/* Container de ações secundárias (Consulta e Admin) */
+.secondary-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4); /* Espaçamento menor entre os botões secundários */
+  width: 100%;
+  max-width: 360px;
+  animation: fadeInUp var(--transition-slow) 550ms both;
+}
+
+/* Garantir que botões secundários sigam o padrão de largura na home */
+.home-screen .btn-secondary {
+  width: 100%;
+}
+
 /* Rodapé: Endereço */
 .salon-footer {
   display: flex;
