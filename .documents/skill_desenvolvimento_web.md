@@ -63,5 +63,12 @@ A estrutura deve seguir rigorosamente esta organização para garantir modularid
 * Deve sempre atualizar as modificacoes para a branch beta, proibido fazer push para a branch main sem autorização.
 * Sempre perguntar antes de qualquer commit e push se está liberado a ação.
 
+
+## 9. Documentação
+* Deve sempre documentar todas as alteracoes feitas e atualizacoes que foram realizadas no projeto.
+* A documentação deve ser feita em portugues.
+* Deve sempre atualizar o Readme.md com as novas funcionalidades, alterações, etc.
+* Criar documentações sempre na pasta .documents
+
 ---
 *Documento gerado para aplicação em ambiente de desenvolvimento (IDE).*
