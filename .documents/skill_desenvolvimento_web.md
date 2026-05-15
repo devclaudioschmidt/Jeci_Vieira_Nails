@@ -52,5 +52,16 @@ A estrutura deve seguir rigorosamente esta organização para garantir modularid
 * **Fluxo de Trabalho:** A IA deve sempre perguntar qual caminho seguir antes de cada etapa.
 * **Gestão de Repositório (Git/GitHub):** Proibido realizar commits ou pushes sem permissão prévia.
 
+## 7. Testes
+* O sistema deve ser testado em diferentes dispositivos para garantir a responsividade.
+* Os testes devem ser realizados em diferentes navegadores para garantir a compatibilidade.
+* Os testes devem ser realizados em diferentes condições de rede para garantir a performance.
+* Os testes devem ser realizados em diferentes condições de iluminação para garantir a legibilidade.
+* Os testes devem ser realizados em diferentes condições de áudio para garantir a acessibilidade.
+
+## 8. Git Hub
+* Deve sempre atualizar as modificacoes para a branch beta, proibido fazer push para a branch main sem autorização.
+* Sempre perguntar antes de qualquer commit e push se está liberado a ação.
+
 ---
 *Documento gerado para aplicação em ambiente de desenvolvimento (IDE).*
