@@ -36,10 +36,10 @@ Sistema de agendamento para salão de nail design com painel administrativo, flu
 │       ├── agendamento.js
 │       ├── confirmacao.js
 │       └── admin.js
-└── img/
-    ├── logoJeciVieira.svg
-    ├── icon-192.png           # Ícone PWA
-    └── icon-512.png           # Ícone PWA
+└── assets/
+    └── img/
+        ├── logoJeciVieira.svg
+        └── favicon.png           # Ícone PWA
 ```
 
 ## Funcionalidades
@@ -49,6 +49,7 @@ Sistema de agendamento para salão de nail design com painel administrativo, flu
 - Saudação dinâmica (Bom dia / Boa tarde / Boa noite)
 - Consulta de agendamentos por telefone (modal de busca)
 - Link para agendamento
+- Rodapé com telefone (link direto para WhatsApp) e endereço (link para Google Maps)
 
 ### Fluxo de Agendamento (`agendamento.html`)
 - 4 passos com indicador de progresso:
@@ -86,7 +87,7 @@ Sistema de agendamento para salão de nail design com painel administrativo, flu
 
 ### PWA
 - Service Worker com cache dos arquivos principais
-- Ícones PNG 192×192 e 512×512
+- Ícone SVG + favicon PNG para PWA
 - `start_url` e `scope` relativos
 - Compatível com instalação em Android e iOS
 

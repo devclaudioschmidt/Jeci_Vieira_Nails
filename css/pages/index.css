@@ -81,6 +81,16 @@
   animation: fadeInUp var(--transition-slow) 600ms both;
 }
 
+.salon-footer a {
+  color: var(--color-primary);
+  text-decoration: none;
+  transition: filter var(--transition-fast);
+}
+
+.salon-footer a:hover {
+  filter: brightness(1.2);
+}
+
 
 
 /* ---- Resultados da busca de agendamentos (modal) ---- */

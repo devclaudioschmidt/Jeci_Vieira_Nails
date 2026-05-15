@@ -26,8 +26,19 @@ async function loadSalonInfo() {
     const elAddress = document.getElementById('salon-address');
     const elNotice  = document.getElementById('salon-notice');
 
-    if (elPhone)   elPhone.textContent   = 'WhatsApp: ' + (phone || '');
-    if (elAddress) elAddress.textContent = address || '';
+    if (elPhone && phone) {
+      const wppNumber = phone.replace(/\D/g, '');
+      const fullNumber = wppNumber.startsWith('55') ? wppNumber : `55${wppNumber}`;
+      elPhone.innerHTML = `WhatsApp: <a href="https://wa.me/${fullNumber}" target="_blank" rel="noopener noreferrer">${phone}</a>`;
+    } else if (elPhone) {
+      elPhone.textContent = phone || '';
+    }
+    if (elAddress && address) {
+      const mapsUrl = `https://www.google.com/maps/search/${encodeURIComponent(address)}`;
+      elAddress.innerHTML = `📍 <a href="${mapsUrl}" target="_blank" rel="noopener noreferrer">${address}</a>`;
+    } else if (elAddress) {
+      elAddress.textContent = address || '';
+    }
     if (elNotice) {
       elNotice.textContent = notice || '';
 
