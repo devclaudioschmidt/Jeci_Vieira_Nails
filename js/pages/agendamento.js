@@ -8,11 +8,13 @@ import { applyPhoneMask, formatDatePTBR, showToast } from '../global.js';
 // ---- Estado da sessão de agendamento ----
 const booking = {
   procedure: null,   // { id, name, price, duration }
-  date: null,   // Date object
-  time: null,   // string "HH:MM"
+  date: null,        // Date object
+  time: null,        // string "HH:MM"
   name: '',
   phone: '',
 };
+
+let calendarMonth = new Date(); // Mês atualmente exibido no calendário
 
 // ---- Referências ao DOM ----
 const steps = document.querySelectorAll('.booking-step');
@@ -149,31 +151,36 @@ function selectProcedure(item) {
 
 btnStep1Next.addEventListener('click', () => goToStep(2));
 
-// ---- STEP 2: Calendário simples ----
+// ---- STEP 2: Calendário com navegação entre meses ----
 function buildCalendar() {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  const year = today.getFullYear();
-  const month = today.getMonth();
+  const year = calendarMonth.getFullYear();
+  const m = calendarMonth.getMonth();
 
-  const monthLabel = today.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
-  const firstDay = new Date(year, month, 1).getDay(); // 0=Dom
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const monthLabel = calendarMonth.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+  const firstDay = new Date(year, m, 1).getDay(); // 0=Dom
+  const daysInMonth = new Date(year, m + 1, 0).getDate();
 
   const weekDays = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
-  let html = `<p class="calendar-month">${monthLabel}</p>
+  let html = `
+    <div class="cal-nav">
+      <button id="cal-prev" aria-label="Mês anterior">&#8592;</button>
+      <span class="calendar-month">${monthLabel}</span>
+      <button id="cal-next" aria-label="Próximo mês">&#8594;</button>
+    </div>
     <div class="calendar-grid">
       ${weekDays.map(d => `<span class="cal-header">${d}</span>`).join('')}
       ${Array(firstDay).fill('<span></span>').join('')}`;
 
   for (let d = 1; d <= daysInMonth; d++) {
-    const date = new Date(year, month, d);
+    const date = new Date(year, m, d);
     const isPast = date < today;
     const isSunday = date.getDay() === 0;
     const disabled = isPast || isSunday;
     html += `<button class="cal-day${disabled ? ' disabled' : ''}"
-                     data-year="${year}" data-month="${month}" data-day="${d}"
+                     data-year="${year}" data-month="${m}" data-day="${d}"
                      ${disabled ? 'disabled' : ''}
                      aria-label="${formatDatePTBR(date)}">
                ${d}
@@ -183,6 +190,18 @@ function buildCalendar() {
   html += '</div>';
   datePicker.innerHTML = html;
 
+  // Navegação entre meses
+  datePicker.querySelector('#cal-prev').addEventListener('click', () => {
+    calendarMonth.setMonth(calendarMonth.getMonth() - 1);
+    buildCalendar();
+  });
+
+  datePicker.querySelector('#cal-next').addEventListener('click', () => {
+    calendarMonth.setMonth(calendarMonth.getMonth() + 1);
+    buildCalendar();
+  });
+
+  // Seleção de dia
   datePicker.querySelectorAll('.cal-day:not(.disabled)').forEach(btn => {
     btn.addEventListener('click', () => {
       datePicker.querySelectorAll('.cal-day').forEach(b => b.classList.remove('selected'));
