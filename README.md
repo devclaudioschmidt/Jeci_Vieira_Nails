@@ -7,15 +7,12 @@ Sistema de agendamento para salão de nail design com painel administrativo, flu
 - **Core:** HTML5, CSS3, JavaScript (ES6+) puros — sem frameworks
 - **Backend:** Firebase (Firestore, Authentication)
 - **Ícones:** Emoji nativos — sem dependências externas
-- **PWA:** Suporte a instalação na tela inicial (Android e iOS)
 
 ## Estrutura de Pastas
 
 ```
 /
 ├── index.html                 # Página inicial (cliente)
-├── manifest.json              # Config PWA
-├── sw.js                      # Service Worker
 ├── pages/
 │   ├── agendamento.html       # Fluxo de agendamento (cliente)
 │   ├── confirmacao.html       # Tela de confirmação
@@ -39,7 +36,7 @@ Sistema de agendamento para salão de nail design com painel administrativo, flu
 └── assets/
     └── img/
         ├── logoJeciVieira.svg
-        └── favicon.png           # Ícone PWA
+        └── favicon.png           # Ícone do site
 ```
 
 ## Funcionalidades
@@ -84,12 +81,6 @@ Sistema de agendamento para salão de nail design com painel administrativo, flu
   - Horários: abertura/fechamento (seg-sex e sábado)
   - Intervalo de almoço
   - Layout em 2 colunas para campos de horário
-
-### PWA
-- Service Worker com cache dos arquivos principais
-- Ícone SVG + favicon PNG para PWA
-- `start_url` e `scope` relativos
-- Compatível com instalação em Android e iOS
 
 ## Design System (Variáveis CSS)
 
