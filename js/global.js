@@ -110,7 +110,9 @@ export function showToast(message, type = 'info') {
     boxShadow:    '0 4px 16px rgba(0,0,0,0.3)',
   });
 
-  document.body.appendChild(toast);
+  const openDialog = document.querySelector('.app-modal[open]');
+  const target = openDialog || document.body;
+  target.appendChild(toast);
 
   // Animar entrada
   requestAnimationFrame(() => {

@@ -288,6 +288,19 @@ async function buildTimeSlots() {
       appointments.push({ start: aStart, end: aStart + aDur });
     });
 
+    // Buscar bloqueios do admin para esta data
+    const blockSlots = [];
+    try {
+      const blockQ = query(collection(db, 'horariosBloqueados'), where('blockDate', '==', dateStr));
+      const blockSnap = await getDocs(blockQ);
+      blockSnap.forEach(doc => {
+        const data = doc.data();
+        blockSlots.push({ start: toMin(data.blockInit), end: toMin(data.blockEnd) });
+      });
+    } catch (err) {
+      console.error('[agendamento.js] Erro ao buscar bloqueios:', err);
+    }
+
     const duration = booking.procedure?.duration || 60;
     
     // 3. Gerar slots de 30 em 30 min e filtrar
@@ -316,7 +329,17 @@ async function buildTimeSlots() {
         }
       }
 
-      // 3.4 Checar se o horário já passou (no dia de hoje)
+      // 3.4 Checar se conflita com bloqueios do admin
+      if (!hasConflict) {
+        for (const block of blockSlots) {
+          if (Math.max(slotStart, block.start) < Math.min(slotEnd, block.end)) {
+            hasConflict = true;
+            break;
+          }
+        }
+      }
+
+      // 3.5 Checar se o horário já passou (no dia de hoje)
       const today = new Date();
       const todayY = today.getFullYear();
       const todayM = String(today.getMonth() + 1).padStart(2, '0');

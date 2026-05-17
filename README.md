@@ -76,6 +76,12 @@ Sistema de agendamento para salão de nail design com painel administrativo, flu
 - **Procedimentos:**
   - CRUD completo (criar, listar, editar, excluir)
   - Modal para cadastro com nome, preço e duração
+- **Bloqueios:**
+  - View "Bloqueios" no painel administrativo
+  - Criar/Excluir bloqueios por data, período e motivo
+  - Horários bloqueados ficam indisponíveis para clientes e agendamento manual
+  - Indicador visual no calendário da agenda (círculo vermelho)
+  - Dados armazenados no Firestore (collection `horariosBloqueados`)
 - **Configurações:**
   - Telefone, endereço e aviso
   - Horários: abertura/fechamento (seg-sex e sábado)
@@ -116,7 +122,7 @@ main  →  (merge autorizado após testes)
 ## Configuração do Firebase
 
 O projeto utiliza:
-- **Firestore** — `configuracoes/salao`, `agendamentos`, `procedimentos`, `admins`
+- **Firestore** — `configuracoes/salao`, `agendamentos`, `procedimentos`, `admins`, `horariosBloqueados`
 - **Authentication** — email/senha para admin
 - **Security Rules** — baseadas em `request.auth.uid`
 

@@ -430,3 +430,89 @@
 .booking-flow-admin .date-picker {
   margin-bottom: var(--space-6);
 }
+
+/* ---- Bloqueio de Horários ---- */
+.blocked-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.block-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-4);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  border-left: 4px solid var(--color-error);
+}
+
+.block-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.block-date {
+  font-size: var(--fs-base);
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.block-time {
+  font-size: var(--fs-sm);
+  color: var(--color-error);
+  font-weight: 600;
+}
+
+.block-motive {
+  font-size: var(--fs-sm);
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+.block-actions {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.btn-delete-block:hover {
+  color: var(--color-error);
+}
+
+/* Cartão de bloqueio na lista de agendamentos do dia */
+.block-appointment-card {
+  border-left: 4px solid var(--color-error);
+  opacity: 0.85;
+}
+
+.block-appointment-card .appointment-time {
+  color: var(--color-error);
+}
+
+.block-appointment-card .appointment-client {
+  color: var(--color-error);
+}
+
+.block-appointment-card .block-motive-text {
+  font-style: italic;
+}
+
+/* Dia com bloqueio no calendário admin */
+.cal-day.has-block {
+  position: relative;
+}
+
+.cal-day.has-block::after {
+  content: '';
+  position: absolute;
+  bottom: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-error);
+}

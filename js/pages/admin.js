@@ -21,6 +21,13 @@ const btnLogout    = document.getElementById('btn-logout');
 const navBtns      = document.querySelectorAll('.nav-btn');
 const adminViews   = document.querySelectorAll('.admin-view');
 
+// ---- Referências do modal de bloqueio ----
+const modalBlockBooking = document.getElementById('modal-block-booking');
+const btnOpenBlock      = document.getElementById('btn-add-block');
+const btnCloseBlock     = document.getElementById('btn-close-block-modal');
+const btnCancelBlock    = document.getElementById('btn-cancel-block');
+const formBlock         = document.getElementById('form-block');
+
 // ---- Estado do agendamento manual (Admin) ----
 let adminCalendarMonth = new Date(); // Mês exibido no calendário do modal
 
@@ -34,6 +41,9 @@ const adminBooking = {
 
 // ---- Estado do cancelamento pendente ----
 let pendingCancel = null;
+
+// ---- Estado do bloqueio pendente de exclusão ----
+let pendingDeleteBlock = null;
 
 // ================================================
 // AUTENTICAÇÃO
@@ -99,6 +109,7 @@ function showView(viewName) {
   adminViews.forEach(v => v.classList.toggle('hidden',  v.id !== `view-${viewName}`));
 
   if (viewName === 'procedimentos') loadProceduresAdmin();
+  if (viewName === 'bloqueios') loadBlockedSlots();
   if (viewName === 'configuracoes') loadConfig();
 }
 
@@ -139,6 +150,21 @@ async function buildAdminCalendar(month) {
     console.error('[admin.js] Erro ao buscar datas com agendamento:', err);
   }
 
+  // Buscar datas com bloqueio neste mês
+  let datesWithBlocks = new Set();
+  try {
+    const blockQuery = query(
+      collection(db, 'horariosBloqueados'),
+      where('blockDate', '>=', monthStart),
+      where('blockDate', '<=', monthEnd),
+      limit(150)
+    );
+    const blockSnap = await getDocs(blockQuery);
+    blockSnap.forEach(doc => datesWithBlocks.add(doc.data().blockDate));
+  } catch (err) {
+    console.error('[admin.js] Erro ao buscar datas com bloqueio:', err);
+  }
+
   const weekDays  = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
 
   let html = `
@@ -160,10 +186,13 @@ async function buildAdminCalendar(month) {
     const dateStr = `${year}-${pad(m + 1)}-${pad(d)}`;
     const hasAppt = datesWithAppts.has(dateStr);
 
+    const hasBlock = datesWithBlocks.has(dateStr);
+
     let classes = 'cal-day';
     if (isDisabled)  classes += ' disabled';
     if (isSelected)  classes += ' selected';
     if (hasAppt)     classes += ' has-appointment';
+    if (hasBlock)    classes += ' has-block';
 
     html += `<button class="${classes}"
                      data-date="${date.toISOString()}"
@@ -212,13 +241,9 @@ async function loadAgenda(date) {
     );
     const snapshot = await getDocs(q);
 
-    if (snapshot.empty) {
-      list.innerHTML = `<li class="empty-state-msg slide-up-anim">Nenhum agendamento para este dia.</li>`;
-      return;
-    }
-
     list.innerHTML = '';
     const template = document.getElementById('tpl-appointment');
+    const blockTemplate = document.getElementById('tpl-block-appointment');
     
     // Ordenação em memória (JavaScript) para evitar a necessidade de Índice Composto no Firestore
     const results = [];
@@ -227,12 +252,56 @@ async function loadAgenda(date) {
       data.id = docSnap.id;
       results.push(data);
     });
+
+    // Buscar bloqueios do dia e adicionar como cartões na lista
+    try {
+      const blockQ = query(collection(db, 'horariosBloqueados'), where('blockDate', '==', dateStr));
+      const blockSnap = await getDocs(blockQ);
+      blockSnap.forEach(docSnap => {
+        const d = docSnap.data();
+        results.push({
+          id: docSnap.id,
+          isBlock: true,
+          time: d.blockInit,
+          blockEnd: d.blockEnd,
+          blockText: d.blockText,
+        });
+      });
+    } catch (err) {
+      console.error('[admin.js] Erro ao buscar bloqueios para agenda:', err);
+    }
     
     results.sort((a, b) => {
-      return a.time > b.time ? 1 : -1; // Mais cedo primeiro
+      if (a.isBlock && b.isBlock) return a.time > b.time ? 1 : -1;
+      return a.time > b.time ? 1 : -1;
     });
 
+    if (results.length === 0) {
+      list.innerHTML = `<li class="empty-state-msg slide-up-anim">Nenhum agendamento para este dia.</li>`;
+      return;
+    }
+
     results.forEach(d => {
+      if (d.isBlock) {
+        // Renderizar cartão de bloqueio
+        const clone = blockTemplate.content.cloneNode(true);
+        clone.querySelector('[data-block-id]').dataset.blockId = d.id;
+        clone.querySelector('.block-time-slot').textContent = `${d.time} - ${d.blockEnd}`;
+        clone.querySelector('.block-motive-text').textContent = d.blockText;
+
+        const btnDelete = clone.querySelector('.btn-delete-block-agenda');
+        btnDelete.addEventListener('click', () => {
+          pendingDeleteBlock = { id: d.id };
+          document.getElementById('delete-block-date').textContent = formatDatePTBR(new Date(dateStr + 'T00:00:00'));
+          document.getElementById('delete-block-time').textContent = `${d.time} às ${d.blockEnd}`;
+          document.getElementById('delete-block-motive').textContent = d.blockText;
+          modalDeleteBlock.showModal();
+        });
+
+        list.appendChild(clone);
+        return;
+      }
+
       const clone = template.content.cloneNode(true);
       clone.querySelector('[data-appointment-id]').dataset.appointmentId = d.id;
       clone.querySelector('.appointment-time').textContent = d.time;
@@ -457,6 +526,245 @@ document.getElementById('salon-config-form').addEventListener('submit', async (e
   } finally {
     btn.disabled    = false;
     btn.textContent = 'Salvar';
+  }
+});
+
+// ================================================
+// BLOQUEIO DE HORÁRIOS (VIEW)
+// ================================================
+
+/**
+ * Carrega e renderiza a lista de horários bloqueados.
+ */
+async function loadBlockedSlots() {
+  const list = document.getElementById('blocked-list');
+  list.innerHTML = '<li class="skeleton-card slide-up-anim"></li>'.repeat(3);
+
+  try {
+    const q = query(collection(db, 'horariosBloqueados'), limit(100));
+    const snap = await getDocs(q);
+
+    list.innerHTML = '';
+    if (snap.empty) {
+      list.innerHTML = '<li class="empty-state-msg slide-up-anim">Nenhum horário bloqueado.</li>';
+      return;
+    }
+
+    // Ordenar em memória (mais recente primeiro)
+    const results = [];
+    snap.forEach(docSnap => {
+      const d = docSnap.data();
+      d.id = docSnap.id;
+      results.push(d);
+    });
+    results.sort((a, b) => a.blockDate > b.blockDate ? -1 : 1);
+
+    const template = document.getElementById('tpl-block');
+    results.forEach(d => {
+      const clone = template.content.cloneNode(true);
+      clone.querySelector('[data-block-id]').dataset.blockId = d.id;
+
+      const dateObj = new Date(d.blockDate + 'T00:00:00');
+      clone.querySelector('.block-date').textContent = dateObj.toLocaleDateString('pt-BR', {
+        weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+      });
+      clone.querySelector('.block-time').textContent = `${d.blockInit} às ${d.blockEnd}`;
+      clone.querySelector('.block-motive').textContent = d.blockText;
+
+      const btnDelete = clone.querySelector('.btn-delete-block');
+      btnDelete.addEventListener('click', () => deleteBlock(d.id));
+
+      list.appendChild(clone);
+    });
+  } catch (err) {
+    console.error('[admin.js] Erro ao carregar bloqueios:', err);
+    showToast('Erro ao carregar bloqueios.', 'error');
+  }
+}
+
+/**
+ * Exclui um bloqueio do Firestore.
+ * @param {string} id
+ */
+async function deleteBlock(id) {
+  try {
+    const docSnap = await getDoc(doc(db, 'horariosBloqueados', id));
+    if (!docSnap.exists()) return;
+    const d = docSnap.data();
+    const dateObj = new Date(d.blockDate + 'T00:00:00');
+    document.getElementById('delete-block-date').textContent = dateObj.toLocaleDateString('pt-BR', {
+      weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+    });
+    document.getElementById('delete-block-time').textContent = `${d.blockInit} às ${d.blockEnd}`;
+    document.getElementById('delete-block-motive').textContent = d.blockText;
+    pendingDeleteBlock = { id, ...d };
+    modalDeleteBlock.showModal();
+  } catch (err) {
+    console.error('[admin.js] Erro ao buscar bloqueio:', err);
+  }
+}
+
+// --- Eventos do modal de bloqueio ---
+// ---- Referências do modal de exclusão de bloqueio ----
+const modalDeleteBlock = document.getElementById('modal-delete-block');
+const btnCloseDeleteBlock = document.getElementById('btn-close-delete-block-modal');
+const btnDeleteBlockNo = document.getElementById('btn-delete-block-no');
+const btnDeleteBlockYes = document.getElementById('btn-delete-block-yes');
+
+// ---- Referências do modal de conflito de bloqueio ----
+const modalBlockConflict = document.getElementById('modal-block-conflict');
+const btnCloseConflict = document.getElementById('btn-close-conflict-modal');
+const btnConflictOk = document.getElementById('btn-conflict-ok');
+
+btnOpenBlock.addEventListener('click', () => {
+  formBlock.reset();
+  modalBlockBooking.showModal();
+});
+
+const closeBlockModal = () => modalBlockBooking.close();
+btnCloseBlock.addEventListener('click', closeBlockModal);
+btnCancelBlock.addEventListener('click', closeBlockModal);
+
+// Eventos do modal de exclusão de bloqueio
+const closeDeleteBlockModal = () => {
+  pendingDeleteBlock = null;
+  modalDeleteBlock.close();
+};
+btnCloseDeleteBlock.addEventListener('click', closeDeleteBlockModal);
+btnDeleteBlockNo.addEventListener('click', closeDeleteBlockModal);
+
+// Eventos do modal de conflito de bloqueio
+btnCloseConflict.addEventListener('click', () => modalBlockConflict.close());
+btnConflictOk.addEventListener('click', () => modalBlockConflict.close());
+
+btnDeleteBlockYes.addEventListener('click', async () => {
+  if (!pendingDeleteBlock) return;
+  btnDeleteBlockYes.disabled = true;
+  btnDeleteBlockYes.textContent = 'Removendo…';
+  try {
+    await deleteDoc(doc(db, 'horariosBloqueados', pendingDeleteBlock.id));
+    showToast('Bloqueio removido.', 'success');
+    closeDeleteBlockModal();
+    loadBlockedSlots();
+    // Se estiver na view agenda, recarregar
+    const agendaView = document.getElementById('view-agenda');
+    if (!agendaView.classList.contains('hidden')) {
+      loadAgenda(selectedDate);
+    }
+  } catch (err) {
+    console.error('[admin.js] Erro ao excluir bloqueio:', err);
+    showToast('Erro ao excluir bloqueio.', 'error');
+  } finally {
+    btnDeleteBlockYes.disabled = false;
+    btnDeleteBlockYes.textContent = 'Sim, remover';
+  }
+});
+
+formBlock.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const blockDate = document.getElementById('block-date').value;
+  const blockInit = document.getElementById('block-init').value;
+  const blockEnd  = document.getElementById('block-end').value;
+  const blockText = document.getElementById('block-text').value.trim();
+
+  const toMin = t => { if (!t) return 0; const [h, m] = t.split(':').map(Number); return h * 60 + m; };
+
+  // Validar horário
+  if (toMin(blockInit) >= toMin(blockEnd)) {
+    return showToast('Horário de término deve ser após o início.', 'error');
+  }
+
+  // Validar contra configurações do salão
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const blockDateObj = new Date(blockDate + 'T00:00:00');
+
+  if (blockDateObj < today) {
+    return showToast('Não é possível bloquear uma data passada.', 'error');
+  }
+  if (blockDateObj.getDay() === 0) {
+    return showToast('Não é possível bloquear horário em um domingo (dia fechado).', 'error');
+  }
+
+  let config;
+  try {
+    const configSnap = await getDoc(doc(db, 'configuracoes', 'salao'));
+    config = configSnap.exists() ? configSnap.data() : {};
+  } catch (err) {
+    console.error('[admin.js] Erro ao buscar config:', err);
+    return showToast('Erro ao validar horário.', 'error');
+  }
+
+  const isSaturday = blockDateObj.getDay() === 6;
+  let hStart, hEnd;
+  if (isSaturday) {
+    hStart = config.hoursSaturdayStart || '09:00';
+    hEnd   = config.hoursSaturdayEnd   || '13:00';
+  } else {
+    hStart = config.hoursStart || '09:00';
+    hEnd   = config.hoursEnd   || '18:00';
+  }
+
+  const dayStart = toMin(hStart);
+  const dayEnd   = toMin(hEnd);
+  const bStart   = toMin(blockInit);
+  const bEnd     = toMin(blockEnd);
+
+  if (bStart < dayStart || bEnd > dayEnd) {
+    const dayType = isSaturday ? 'sábado' : 'dias úteis';
+    return showToast(`Horário fora do expediente (${dayType}: ${hStart} às ${hEnd}).`, 'error');
+  }
+
+  // Verificar se já existem agendamentos conflitantes
+  try {
+    const apptQ = query(collection(db, 'agendamentos'), where('date', '==', blockDate));
+    const apptSnap = await getDocs(apptQ);
+    const conflictingAppts = [];
+    apptSnap.forEach(docSnap => {
+      const a = docSnap.data();
+      const aStart = toMin(a.time);
+      const aEnd = aStart + (a.procedureDuration || 60);
+      if (Math.max(aStart, bStart) < Math.min(aEnd, bEnd)) {
+        conflictingAppts.push(`${a.time} — ${a.clientName} (${a.procedureName})`);
+      }
+    });
+
+    if (conflictingAppts.length > 0) {
+      const conflictList = document.getElementById('conflict-appointments-list');
+      conflictList.innerHTML = conflictingAppts.map(a =>
+        `<li style="padding:6px 0;border-bottom:1px solid var(--color-border);font-size:var(--fs-sm);color:var(--color-text);">${a}</li>`
+      ).join('');
+      showToast('Conflito com agendamentos existentes!', 'error');
+      modalBlockConflict.showModal();
+      return;
+    }
+  } catch (err) {
+    console.error('[admin.js] Erro ao verificar agendamentos conflitantes:', err);
+    return showToast('Erro ao verificar agendamentos.', 'error');
+  }
+
+  const btn = document.getElementById('btn-save-block');
+  btn.disabled = true;
+  btn.textContent = 'Bloqueando…';
+
+  try {
+    await addDoc(collection(db, 'horariosBloqueados'), {
+      blockDate,
+      blockInit,
+      blockEnd,
+      blockText,
+      createdAt: serverTimestamp(),
+      createdBy: auth.currentUser?.uid || 'unknown',
+    });
+    showToast('Horário bloqueado com sucesso!', 'success');
+    closeBlockModal();
+    loadBlockedSlots();
+  } catch (err) {
+    console.error('[admin.js] Erro ao bloquear horário:', err);
+    showToast('Erro ao bloquear horário.', 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Bloquear Horário';
   }
 });
 
@@ -709,6 +1017,19 @@ async function adminBuildTimeSlots() {
       appointments.push({ start: s, end: s + dur });
     });
 
+    // Buscar bloqueios do admin para esta data
+    const blockSlots = [];
+    try {
+      const blockQ = query(collection(db, 'horariosBloqueados'), where('blockDate', '==', dateStr));
+      const blockSnap = await getDocs(blockQ);
+      blockSnap.forEach(doc => {
+        const data = doc.data();
+        blockSlots.push({ start: toMin(data.blockInit), end: toMin(data.blockEnd) });
+      });
+    } catch (err) {
+      console.error('[admin.js] Erro ao buscar bloqueios:', err);
+    }
+
     const duration = adminBooking.procedure.duration || 60;
     const slots = [];
 
@@ -720,6 +1041,13 @@ async function adminBuildTimeSlots() {
       let conflict = false;
       for (const appt of appointments) {
         if (Math.max(curr, appt.start) < Math.min(sEnd, appt.end)) { conflict = true; break; }
+      }
+
+      // Verificar conflito com bloqueios admin
+      if (!conflict) {
+        for (const block of blockSlots) {
+          if (Math.max(curr, block.start) < Math.min(sEnd, block.end)) { conflict = true; break; }
+        }
       }
 
       // Validação de horário passado (hoje)

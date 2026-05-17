@@ -55,6 +55,7 @@
       <nav class="admin-nav" aria-label="Navegação admin">
         <button id="nav-agenda"      class="nav-btn active"   data-view="agenda">Agenda</button>
         <button id="nav-procedimentos" class="nav-btn"        data-view="procedimentos">Procedimentos</button>
+        <button id="nav-bloqueios"     class="nav-btn"        data-view="bloqueios">Bloqueios</button>
         <button id="nav-configuracoes" class="nav-btn"        data-view="configuracoes">Configurações</button>
       </nav>
     </header>
@@ -81,6 +82,17 @@
         <button id="btn-add-procedure" class="btn-primary btn-sm">+ Novo</button>
       </div>
       <ul id="procedures-admin-list" class="procedures-admin-list">
+        <!-- Populado via JS -->
+      </ul>
+    </div>
+
+    <!-- VIEW: Bloqueios -->
+    <div id="view-bloqueios" class="admin-view hidden">
+      <div class="view-toolbar">
+        <h3>Horários Bloqueados</h3>
+        <button id="btn-add-block" class="btn-primary btn-sm">+ Novo Bloqueio</button>
+      </div>
+      <ul id="blocked-list" class="blocked-list">
         <!-- Populado via JS -->
       </ul>
     </div>
@@ -268,6 +280,81 @@
     </div>
   </dialog>
 
+  <!-- ===== MODAL DE EXCLUSÃO DE BLOQUEIO ===== -->
+  <dialog id="modal-delete-block" class="app-modal" aria-labelledby="modal-delete-block-title">
+    <div class="modal-content">
+      <header class="modal-header">
+        <h3 id="modal-delete-block-title">Remover Bloqueio</h3>
+        <button id="btn-close-delete-block-modal" class="btn-icon" aria-label="Fechar modal">&times;</button>
+      </header>
+      <div class="modal-body">
+        <p class="modal-cancel-text">Tem certeza que deseja remover este bloqueio?</p>
+        <div class="cancel-details">
+          <p><strong>Data:</strong> <span id="delete-block-date"></span></p>
+          <p><strong>Horário:</strong> <span id="delete-block-time"></span></p>
+          <p><strong>Motivo:</strong> <span id="delete-block-motive"></span></p>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" id="btn-delete-block-no" class="btn-secondary">Voltar</button>
+        <button type="button" id="btn-delete-block-yes" class="btn-primary" style="background:var(--color-error);color:#fff;">Sim, remover</button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- ===== MODAL DE CONFLITO DE BLOQUEIO ===== -->
+  <dialog id="modal-block-conflict" class="app-modal" aria-labelledby="modal-conflict-title">
+    <div class="modal-content">
+      <header class="modal-header">
+        <h3 id="modal-conflict-title">Conflito de Agendamentos</h3>
+        <button id="btn-close-conflict-modal" class="btn-icon" aria-label="Fechar modal">&times;</button>
+      </header>
+      <div class="modal-body">
+        <p class="modal-cancel-text">Não é possível bloquear este horário. Existem agendamentos conflitantes:</p>
+        <ul id="conflict-appointments-list" class="cancel-details" style="list-style:none;padding:0;"></ul>
+      </div>
+      <div class="modal-actions">
+        <button type="button" id="btn-conflict-ok" class="btn-primary">OK</button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- ===== MODAL DE BLOQUEIO DE HORÁRIO ===== -->
+  <dialog id="modal-block-booking" class="app-modal" aria-labelledby="modal-block-title">
+    <div class="modal-content">
+      <header class="modal-header">
+        <h3 id="modal-block-title">Bloquear Horário</h3>
+        <button id="btn-close-block-modal" class="btn-icon" aria-label="Fechar modal">&times;</button>
+      </header>
+      <form id="form-block">
+        <div class="config-field">
+          <label for="block-date">Data do bloqueio</label>
+          <input type="date" id="block-date" name="blockDate" required />
+        </div>
+
+        <div class="config-row">
+          <h4 class="config-row-title">Período</h4>
+          <div class="config-field">
+            <label for="block-init">Início</label>
+            <input type="time" id="block-init" name="blockInit" required />
+          </div>
+          <div class="config-field">
+            <label for="block-end">Fim</label>
+            <input type="time" id="block-end" name="blockEnd" required />
+          </div>
+        </div>
+
+        <label for="block-text">Motivo do bloqueio</label>
+        <textarea id="block-text" name="blockText" rows="2" placeholder="Ex.: Compromisso pessoal, feriado, etc." required></textarea>
+
+        <div class="modal-actions">
+          <button type="button" id="btn-cancel-block" class="btn-secondary">Cancelar</button>
+          <button type="submit" id="btn-save-block" class="btn-primary">Bloquear Horário</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
   <!-- ===== TEMPLATES ===== -->
   <template id="tpl-appointment">
     <li class="appointment-card slide-up-anim" data-appointment-id="">
@@ -280,6 +367,32 @@
       <div class="appointment-actions">
         <button class="btn-icon btn-action-client btn-whatsapp-client" aria-label="Enviar mensagem no WhatsApp" title="Enviar mensagem">📱</button>
         <button class="btn-icon btn-action-client btn-cancel-appointment" aria-label="Cancelar agendamento" title="Cancelar agendamento">🗑️</button>
+      </div>
+    </li>
+  </template>
+
+  <template id="tpl-block">
+    <li class="block-item slide-up-anim" data-block-id="">
+      <div class="block-info">
+        <strong class="block-date"></strong>
+        <span class="block-time"></span>
+        <p class="block-motive"></p>
+      </div>
+      <div class="block-actions">
+        <button class="btn-icon btn-delete-block" aria-label="Excluir bloqueio">🗑️</button>
+      </div>
+    </li>
+  </template>
+
+  <template id="tpl-block-appointment">
+    <li class="appointment-card slide-up-anim block-appointment-card" data-block-id="">
+      <span class="appointment-time block-time-slot"></span>
+      <div class="appointment-info">
+        <p class="appointment-client">🔒 Bloqueado</p>
+        <p class="appointment-procedure block-motive-text"></p>
+      </div>
+      <div class="appointment-actions">
+        <button class="btn-icon btn-action-client btn-delete-block-agenda" aria-label="Excluir bloqueio">🗑️</button>
       </div>
     </li>
   </template>
