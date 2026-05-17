@@ -62,6 +62,20 @@ export function getGreeting() {
  * @param {string}  message
  * @param {'success'|'error'|'info'} type
  */
+/**
+ * Gera o HTML da barra de navegação do calendário (setas anterior/próximo).
+ * @param {string} monthLabel  — rótulo do mês (ex: "maio de 2026")
+ * @returns {string}
+ */
+export function buildCalNavHTML(monthLabel) {
+  return `
+    <div class="cal-nav">
+      <button class="cal-prev cal-nav-btn" aria-label="Mês anterior">&#8592;</button>
+      <span class="calendar-month">${monthLabel}</span>
+      <button class="cal-next cal-nav-btn" aria-label="Próximo mês">&#8594;</button>
+    </div>`;
+}
+
 export function showToast(message, type = 'info') {
   const existing = document.getElementById('toast-notification');
   if (existing) existing.remove();

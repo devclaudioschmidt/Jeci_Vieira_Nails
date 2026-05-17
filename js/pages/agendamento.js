@@ -3,7 +3,7 @@
 // ================================================
 import { db } from '../firebase/config.js';
 import { collection, getDocs, query, orderBy, doc, getDoc, where } from 'https://www.gstatic.com/firebasejs/11.7.1/firebase-firestore.js';
-import { applyPhoneMask, formatDatePTBR, showToast } from '../global.js';
+import { applyPhoneMask, formatDatePTBR, showToast, buildCalNavHTML } from '../global.js';
 
 // ---- Estado da sessão de agendamento ----
 const booking = {
@@ -164,12 +164,7 @@ function buildCalendar() {
 
   const weekDays = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
-  let html = `
-    <div class="cal-nav">
-      <button id="cal-prev" aria-label="Mês anterior">&#8592;</button>
-      <span class="calendar-month">${monthLabel}</span>
-      <button id="cal-next" aria-label="Próximo mês">&#8594;</button>
-    </div>
+  let html = buildCalNavHTML(monthLabel) + `
     <div class="calendar-grid">
       ${weekDays.map(d => `<span class="cal-header">${d}</span>`).join('')}
       ${Array(firstDay).fill('<span></span>').join('')}`;
@@ -191,12 +186,12 @@ function buildCalendar() {
   datePicker.innerHTML = html;
 
   // Navegação entre meses
-  datePicker.querySelector('#cal-prev').addEventListener('click', () => {
+  datePicker.querySelector('.cal-prev').addEventListener('click', () => {
     calendarMonth.setMonth(calendarMonth.getMonth() - 1);
     buildCalendar();
   });
 
-  datePicker.querySelector('#cal-next').addEventListener('click', () => {
+  datePicker.querySelector('.cal-next').addEventListener('click', () => {
     calendarMonth.setMonth(calendarMonth.getMonth() + 1);
     buildCalendar();
   });

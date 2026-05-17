@@ -8,7 +8,7 @@ import {
   collection, doc, getDoc, getDocs, addDoc, deleteDoc, setDoc,
   query, where, orderBy, serverTimestamp, limit
 }                                                            from 'https://www.gstatic.com/firebasejs/11.7.1/firebase-firestore.js';
-import { showToast, formatDatePTBR, getGreeting, buildWhatsAppUrl } from '../global.js';
+import { showToast, formatDatePTBR, getGreeting, buildWhatsAppUrl, buildCalNavHTML } from '../global.js';
 
 // ---- Referências DOM ----
 const loginScreen  = document.getElementById('login-screen');
@@ -22,6 +22,8 @@ const navBtns      = document.querySelectorAll('.nav-btn');
 const adminViews   = document.querySelectorAll('.admin-view');
 
 // ---- Estado do agendamento manual (Admin) ----
+let adminCalendarMonth = new Date(); // Mês exibido no calendário do modal
+
 const adminBooking = {
   procedure: null,
   date: null,
@@ -550,6 +552,7 @@ btnOpenBooking.addEventListener('click', () => {
 btnCloseBooking.addEventListener('click', () => modalAdminBooking.close());
 
 function resetAdminBooking() {
+  adminCalendarMonth = new Date();
   adminBooking.procedure = null;
   adminBooking.date = null;
   adminBooking.time = null;
@@ -604,14 +607,14 @@ btnAdminStep1Next.addEventListener('click', () => {
 function adminBuildCalendar() {
   const container = document.getElementById('admin-date-picker');
   const today = new Date(); today.setHours(0,0,0,0);
-  const year = today.getFullYear();
-  const month = today.getMonth();
+  const year = adminCalendarMonth.getFullYear();
+  const month = adminCalendarMonth.getMonth();
 
   const firstDay = new Date(year, month, 1).getDay();
   const daysIn = new Date(year, month + 1, 0).getDate();
-  const monthLabel = today.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+  const monthLabel = adminCalendarMonth.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
 
-  let html = `<p class="calendar-month">${monthLabel}</p>
+  let html = buildCalNavHTML(monthLabel) + `
     <div class="calendar-grid">
       ${['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'].map(d => `<span class="cal-header">${d}</span>`).join('')}
       ${Array(firstDay).fill('<span></span>').join('')}`;
@@ -629,6 +632,17 @@ function adminBuildCalendar() {
   html += '</div>';
   container.innerHTML = html;
 
+  // Navegação entre meses
+  container.querySelector('.cal-prev').addEventListener('click', () => {
+    adminCalendarMonth.setMonth(adminCalendarMonth.getMonth() - 1);
+    adminBuildCalendar();
+  });
+  container.querySelector('.cal-next').addEventListener('click', () => {
+    adminCalendarMonth.setMonth(adminCalendarMonth.getMonth() + 1);
+    adminBuildCalendar();
+  });
+
+  // Seleção de dia
   container.querySelectorAll('.cal-day:not(.disabled)').forEach(btn => {
     btn.addEventListener('click', () => {
       container.querySelectorAll('.cal-day').forEach(b => b.classList.remove('selected'));
