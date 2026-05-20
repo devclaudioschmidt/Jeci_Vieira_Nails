@@ -45,6 +45,9 @@ let pendingCancel = null;
 // ---- Estado do bloqueio pendente de exclusão ----
 let pendingDeleteBlock = null;
 
+// ---- Estado do reagendamento de cliente ----
+let rescheduleData = null; // Armazena os dados do agendamento que está sendo reagendado
+
 // ================================================
 // AUTENTICAÇÃO
 // ================================================
@@ -324,6 +327,40 @@ async function loadAgenda(date) {
             `Qualquer dúvida, me chame aqui. Te espero! 💅 — Jeci Vieira Nails`;
 
           window.location.href = buildWhatsAppUrl(d.clientPhone, message);
+        });
+      }
+
+      // Botão Reagendar: abre o modal de reagendamento e pré-seleciona os dados
+      const btnReschedule = clone.querySelector('.btn-reschedule-appointment');
+      if (btnReschedule) {
+        btnReschedule.addEventListener('click', () => {
+          resetAdminBooking(); // Limpa estados anteriores
+          
+          rescheduleData = {
+            id: d.id,
+            clientName: d.clientName,
+            clientPhone: d.clientPhone,
+            procedureId: d.procedureId,
+            procedureName: d.procedureName,
+            procedureDuration: d.procedureDuration,
+            price: d.price,
+            date: d.date,
+            time: d.time,
+          };
+          
+          // Altera o título do modal
+          const modalTitle = document.getElementById('modal-booking-title');
+          if (modalTitle) {
+            modalTitle.textContent = 'Reagendar Cliente';
+          }
+          
+          // Preenche os campos do Passo 4
+          document.getElementById('admin-client-name-input').value = d.clientName;
+          document.getElementById('admin-client-phone-input').value = d.clientPhone;
+          
+          // Abre o modal
+          modalAdminBooking.showModal();
+          adminLoadProcedures();
         });
       }
 
@@ -867,6 +904,14 @@ function resetAdminBooking() {
   adminBooking.name = '';
   adminBooking.phone = '';
   
+  rescheduleData = null; // Limpa os dados de reagendamento anterior
+  
+  // Reseta o título padrão do modal
+  const modalTitle = document.getElementById('modal-booking-title');
+  if (modalTitle) {
+    modalTitle.textContent = 'Agendamento Manual';
+  }
+  
   adminClientForm.reset();
   btnAdminStep1Next.disabled = true;
   btnAdminStep2Next.disabled = true;
@@ -893,6 +938,13 @@ async function adminLoadProcedures() {
         <span class="procedure-name">${data.name}</span>
         ${data.price ? `<span class="procedure-price">R$ ${Number(data.price).toFixed(2)}</span>` : ''}
       `;
+      // Se estiver no modo de reagendamento, pré-seleciona o procedimento correspondente
+      if (rescheduleData && docSnap.id === rescheduleData.procedureId) {
+        li.classList.add('selected');
+        adminBooking.procedure = { id: docSnap.id, ...data };
+        btnAdminStep1Next.disabled = false;
+      }
+
       li.addEventListener('click', () => {
         list.querySelectorAll('.procedure-item').forEach(el => el.classList.remove('selected'));
         li.classList.add('selected');
@@ -1080,6 +1132,10 @@ btnAdminStep3Back.addEventListener('click', () => goToAdminStep(2));
 btnAdminStep3Next.addEventListener('click', () => {
   goToAdminStep(4);
   import('../global.js').then(m => m.applyPhoneMask(document.getElementById('admin-client-phone-input')));
+  const btn = document.getElementById('btn-admin-confirm');
+  if (btn) {
+    btn.textContent = rescheduleData ? '📱 Reagendar' : '📱 Agendar';
+  }
 });
 
 // STEP 4: Confirmação
@@ -1095,7 +1151,7 @@ adminClientForm.addEventListener('submit', async (e) => {
   if (phone.replace(/\D/g,'').length < 10) return showToast('Telefone inválido', 'error');
 
   btn.disabled = true;
-  btn.textContent = 'Agendando...';
+  btn.textContent = rescheduleData ? 'Reagendando...' : 'Agendando...';
 
   try {
     const y = adminBooking.date.getFullYear();
@@ -1103,6 +1159,7 @@ adminClientForm.addEventListener('submit', async (e) => {
     const d = String(adminBooking.date.getDate()).padStart(2, '0');
     const dateStr = `${y}-${m}-${d}`;
 
+    // 1. Cria o novo agendamento
     await addDoc(collection(db, 'agendamentos'), {
       procedureId: adminBooking.procedure.id,
       procedureName: adminBooking.procedure.name,
@@ -1117,21 +1174,36 @@ adminClientForm.addEventListener('submit', async (e) => {
       createdAt: serverTimestamp()
     });
 
-    showToast('Agendamento realizado!', 'success');
+    // 2. Se for reagendamento, exclui o agendamento antigo
+    if (rescheduleData) {
+      await deleteDoc(doc(db, 'agendamentos', rescheduleData.id));
+      showToast('Agendamento reagendado com sucesso!', 'success');
+    } else {
+      showToast('Agendamento realizado!', 'success');
+    }
+
     modalAdminBooking.close();
     loadAgenda(selectedDate); // Recarrega a lista do dia selecionado no painel
 
-    // Notificar cliente via WhatsApp
+    // 3. Notificar cliente via WhatsApp com mensagem correspondente
     const dateFormatted = formatDatePTBR(adminBooking.date);
-    const message = `Olá, ${name}! 😊\n\nSeu agendamento foi confirmado:\n📌 Procedimento: *${adminBooking.procedure.name}*\n📅 Data: *${dateFormatted}*\n🕐 Horário: *${adminBooking.time}*\n\nTe espero! 💅 — Jeci Vieira Nails`;
+    let message = '';
+    
+    if (rescheduleData) {
+      const oldDateObj = new Date(rescheduleData.date + 'T00:00:00');
+      const oldDateFormatted = formatDatePTBR(oldDateObj);
+      message = `Olá, ${name}! 😊\n\nSeu agendamento foi *reagendado*:\n📌 Procedimento: *${adminBooking.procedure.name}*\n📅 Nova Data: *${dateFormatted}*\n🕐 Novo Horário: *${adminBooking.time}*\n\n(Horário anterior: ${oldDateFormatted} às ${rescheduleData.time})\n\nTe espero! 💅 — Jeci Vieira Nails`;
+    } else {
+      message = `Olá, ${name}! 😊\n\nSeu agendamento foi confirmado:\n📌 Procedimento: *${adminBooking.procedure.name}*\n📅 Data: *${dateFormatted}*\n🕐 Horário: *${adminBooking.time}*\n\nTe espero! 💅 — Jeci Vieira Nails`;
+    }
     
     window.location.href = buildWhatsAppUrl(phone, message);
 
   } catch (err) {
-    console.error('[admin.js] Erro ao agendar admin:', err);
-    showToast('Erro ao realizar agendamento', 'error');
+    console.error('[admin.js] Erro ao agendar/reagendar admin:', err);
+    showToast(rescheduleData ? 'Erro ao realizar reagendamento' : 'Erro ao realizar agendamento', 'error');
   } finally {
     btn.disabled = false;
-    btn.textContent = '📱 Agendar e Avisar Cliente';
+    btn.textContent = rescheduleData ? '📱 Reagendar' : '📱 Agendar';
   }
 });
