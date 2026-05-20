@@ -25,7 +25,7 @@ Sistema de agendamento para salão de nail design com painel administrativo, flu
 │       ├── confirmacao.css
 │       └── admin.css
 ├── js/
-│   ├── global.js              # Funções compartilhadas (máscara, toast, WhatsApp)
+│   ├── global.js              # Funções compartilhadas (máscaras de entrada, formatação de exibição, toast, WhatsApp)
 │   ├── firebase/
 │   │   └── config.js          # Configuração do Firebase
 │   └── pages/
@@ -65,6 +65,7 @@ Sistema de agendamento para salão de nail design com painel administrativo, flu
 
 ### Painel Administrativo (`admin.html`)
 - **Autenticação** — login com email/senha via Firebase Auth
+- **Navegação** — Menu lateral "Hamburger" que desliza a partir da direita com indicador dinâmico de aba ativa (prefixo `<`)
 - **Agenda:**
   - Calendário com navegação entre meses
   - Datas com agendamento destacadas com borda

@@ -8,7 +8,7 @@ import {
   collection, doc, getDoc, getDocs, addDoc, deleteDoc, setDoc,
   query, where, orderBy, serverTimestamp, limit
 }                                                            from 'https://www.gstatic.com/firebasejs/11.7.1/firebase-firestore.js';
-import { showToast, formatDatePTBR, getGreeting, buildWhatsAppUrl, buildCalNavHTML } from '../global.js';
+import { showToast, formatDatePTBR, getGreeting, buildWhatsAppUrl, buildCalNavHTML, applyPhoneMask, formatPhoneNumber } from '../global.js';
 
 // ---- Referências DOM ----
 const loginScreen  = document.getElementById('login-screen');
@@ -16,6 +16,12 @@ const adminPanel   = document.getElementById('admin-panel');
 const loginForm    = document.getElementById('login-form');
 const loginError   = document.getElementById('login-error');
 const btnLogout    = document.getElementById('btn-logout');
+
+// Sidebar e Hamburger
+const adminSidebar   = document.getElementById('admin-sidebar');
+const sidebarOverlay = document.getElementById('sidebar-overlay');
+const btnMenuToggle  = document.getElementById('btn-menu-toggle');
+const btnMenuClose   = document.getElementById('btn-menu-close');
 
 // Views
 const navBtns      = document.querySelectorAll('.nav-btn');
@@ -101,15 +107,53 @@ btnLogout.addEventListener('click', async () => {
 });
 
 // ================================================
-// NAVEGAÇÃO ENTRE VIEWS
+// NAVEGAÇÃO E CONTROLE DO MENU LATERAL
 // ================================================
+const originalNavTexts = {
+  agenda: 'Agenda',
+  procedimentos: 'Procedimentos',
+  bloqueios: 'Bloqueios',
+  configuracoes: 'Configurações'
+};
+
+function updateNavTexts(activeView) {
+  navBtns.forEach(btn => {
+    const view = btn.dataset.view;
+    const baseText = originalNavTexts[view] || btn.textContent;
+    if (view === activeView) {
+      btn.textContent = `< ${baseText}`;
+    } else {
+      btn.textContent = baseText;
+    }
+  });
+}
+
+function openSidebar() {
+  adminSidebar?.classList.add('open');
+  sidebarOverlay?.classList.add('open');
+}
+
+function closeSidebar() {
+  adminSidebar?.classList.remove('open');
+  sidebarOverlay?.classList.remove('open');
+}
+
+btnMenuToggle?.addEventListener('click', openSidebar);
+btnMenuClose?.addEventListener('click', closeSidebar);
+sidebarOverlay?.addEventListener('click', closeSidebar);
+
 navBtns.forEach(btn => {
-  btn.addEventListener('click', () => showView(btn.dataset.view));
+  btn.addEventListener('click', () => {
+    closeSidebar();
+    showView(btn.dataset.view);
+  });
 });
 
 function showView(viewName) {
   navBtns.forEach(b    => b.classList.toggle('active', b.dataset.view === viewName));
   adminViews.forEach(v => v.classList.toggle('hidden',  v.id !== `view-${viewName}`));
+
+  updateNavTexts(viewName);
 
   if (viewName === 'procedimentos') loadProceduresAdmin();
   if (viewName === 'bloqueios') loadBlockedSlots();
@@ -310,7 +354,7 @@ async function loadAgenda(date) {
       clone.querySelector('.appointment-time').textContent = d.time;
       clone.querySelector('.appointment-client').textContent = d.clientName;
       clone.querySelector('.appointment-procedure').textContent = d.procedureName;
-      clone.querySelector('.appointment-phone').textContent = d.clientPhone;
+      clone.querySelector('.appointment-phone').textContent = formatPhoneNumber(d.clientPhone);
 
       // Botão WhatsApp: montar mensagem de lembrete para o cliente
       const btnWpp = clone.querySelector('.btn-whatsapp-client');
@@ -356,7 +400,7 @@ async function loadAgenda(date) {
           
           // Preenche os campos do Passo 4
           document.getElementById('admin-client-name-input').value = d.clientName;
-          document.getElementById('admin-client-phone-input').value = d.clientPhone;
+          document.getElementById('admin-client-phone-input').value = formatPhoneNumber(d.clientPhone);
           
           // Abre o modal
           modalAdminBooking.showModal();
@@ -523,7 +567,7 @@ async function loadConfig() {
     const docSnap = await getDoc(doc(db, 'configuracoes', 'salao'));
     if (!docSnap.exists()) return;
     const d = docSnap.data();
-    document.getElementById('config-phone').value        = d.phone        || '';
+    document.getElementById('config-phone').value        = formatPhoneNumber(d.phone)   || '';
     document.getElementById('config-address').value      = d.address      || '';
     document.getElementById('config-notice').value       = d.notice       || '';
     document.getElementById('config-hours-start').value  = d.hoursStart   || '09:00';
@@ -1207,3 +1251,6 @@ adminClientForm.addEventListener('submit', async (e) => {
     btn.textContent = rescheduleData ? '📱 Reagendar' : '📱 Agendar';
   }
 });
+
+// Aplicar máscara no input do telefone do salão em configurações
+applyPhoneMask(document.getElementById('config-phone'));

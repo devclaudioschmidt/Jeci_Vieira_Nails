@@ -3,7 +3,7 @@
 // ================================================
 import { db }                         from '../firebase/config.js';
 import { doc, getDoc, collection, query, where, getDocs, orderBy, limit } from 'https://www.gstatic.com/firebasejs/11.7.1/firebase-firestore.js';
-import { showToast, formatDatePTBR, applyPhoneMask, getGreeting } from '../global.js';
+import { showToast, formatDatePTBR, applyPhoneMask, getGreeting, formatPhoneNumber } from '../global.js';
 
 /**
  * Carrega as configurações do salão gravadas pelo Admin
@@ -27,11 +27,12 @@ async function loadSalonInfo() {
     const elNotice  = document.getElementById('salon-notice');
 
     if (elPhone && phone) {
+      const formattedPhone = formatPhoneNumber(phone);
       const wppNumber = phone.replace(/\D/g, '');
       const fullNumber = wppNumber.startsWith('55') ? wppNumber : `55${wppNumber}`;
-      elPhone.innerHTML = `WhatsApp: <a href="https://wa.me/${fullNumber}" target="_blank" rel="noopener noreferrer">${phone}</a>`;
+      elPhone.innerHTML = `WhatsApp: <a href="https://wa.me/${fullNumber}" target="_blank" rel="noopener noreferrer">${formattedPhone}</a>`;
     } else if (elPhone) {
-      elPhone.textContent = phone || '';
+      elPhone.textContent = formatPhoneNumber(phone) || '';
     }
     if (elAddress && address) {
       const mapsUrl = `https://www.google.com/maps/search/${encodeURIComponent(address)}`;

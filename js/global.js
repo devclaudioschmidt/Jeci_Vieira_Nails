@@ -3,21 +3,43 @@
 // ================================================
 
 /**
- * Máscara de telefone brasileiro: (00) 00000-0000
+ * Máscara de telefone brasileiro: (XX) XXXXX-XXXX ou (XX) XXXX-XXXX (ajustado dinamicamente)
  * @param {HTMLInputElement} input
  */
 export function applyPhoneMask(input) {
+  if (!input) return;
   input.addEventListener('input', () => {
-    let value = input.value.replace(/\D/g, '').slice(0, 11);
-    if (value.length >= 7) {
-      value = `(${value.slice(0,2)}) ${value.slice(2,7)}-${value.slice(7)}`;
-    } else if (value.length >= 3) {
-      value = `(${value.slice(0,2)}) ${value.slice(2)}`;
+    let value = input.value.replace(/\D/g, '');
+    if (value.length > 11) value = value.slice(0, 11);
+    
+    if (value.length > 10) {
+      input.value = `(${value.slice(0, 2)}) ${value.slice(2, 7)}-${value.slice(7)}`;
+    } else if (value.length > 6) {
+      input.value = `(${value.slice(0, 2)}) ${value.slice(2, 6)}-${value.slice(6)}`;
+    } else if (value.length > 2) {
+      input.value = `(${value.slice(0, 2)}) ${value.slice(2)}`;
     } else if (value.length > 0) {
-      value = `(${value}`;
+      input.value = `(${value}`;
+    } else {
+      input.value = '';
     }
-    input.value = value;
   });
+}
+
+/**
+ * Formata uma string de telefone para o padrão brasileiro: (XX) XXXXX-XXXX ou (XX) XXXX-XXXX
+ * @param {string} phone  Telefone (pode conter caracteres não-numéricos ou ser apenas dígitos)
+ * @returns {string}
+ */
+export function formatPhoneNumber(phone) {
+  if (!phone) return '';
+  const digits = phone.replace(/\D/g, '');
+  if (digits.length === 11) {
+    return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
+  } else if (digits.length === 10) {
+    return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
+  }
+  return phone;
 }
 
 /**

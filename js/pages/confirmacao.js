@@ -3,7 +3,7 @@
 // ================================================
 import { db } from '../firebase/config.js';
 import { collection, addDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/11.7.1/firebase-firestore.js';
-import { buildWhatsAppUrl, formatDatePTBR, showToast } from '../global.js';
+import { buildWhatsAppUrl, formatDatePTBR, showToast, formatPhoneNumber } from '../global.js';
 
 // ---- Recuperar dados do agendamento ----
 const raw = sessionStorage.getItem('booking');
@@ -21,7 +21,7 @@ document.getElementById('summary-procedure').textContent = booking.procedure?.na
 document.getElementById('summary-date').textContent = formatDatePTBR(booking.date);
 document.getElementById('summary-time').textContent = booking.time || '—';
 document.getElementById('summary-name').textContent = booking.name || '—';
-document.getElementById('summary-phone').textContent = booking.phone || '—';
+document.getElementById('summary-phone').textContent = formatPhoneNumber(booking.phone) || '—';
 
 // ---- Salvar no Firestore e abrir WhatsApp (A5.6) ----
 document.getElementById('btn-confirmar-whatsapp').addEventListener('click', async () => {
