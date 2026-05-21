@@ -526,7 +526,7 @@ formProcedure.addEventListener('submit', async (e) => {
   try {
     if (id) {
       await setDoc(doc(db, 'procedimentos', id), data, { merge: true });
-      showToast(`"${name}" atualizado!`, 'success');
+      showToast('Procedimento atualizado com sucesso.', 'success');
     } else {
       data.createdAt = serverTimestamp();
       await addDoc(collection(db, 'procedimentos'), data);

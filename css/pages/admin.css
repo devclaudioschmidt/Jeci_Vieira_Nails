@@ -354,6 +354,7 @@
 }
 
 .btn-icon.delete:hover { color: var(--color-error); }
+.btn-icon.edit:hover { color: var(--color-primary); }
 
 
 

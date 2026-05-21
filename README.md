@@ -76,7 +76,7 @@ Sistema de agendamento para salão de nail design com painel administrativo, flu
   - **Agendamento Manual** — modal em 4 passos para agendar em nome do cliente
 - **Procedimentos:**
   - CRUD completo (criar, listar, editar, excluir)
-  - Modal para cadastro com nome, preço e duração
+  - Modal para cadastro e edição com nome, preço e duração
 - **Bloqueios:**
   - View "Bloqueios" no painel administrativo
   - Criar/Excluir bloqueios por data, período e motivo
