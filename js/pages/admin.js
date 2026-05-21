@@ -120,11 +120,7 @@ function updateNavTexts(activeView) {
   navBtns.forEach(btn => {
     const view = btn.dataset.view;
     const baseText = originalNavTexts[view] || btn.textContent;
-    if (view === activeView) {
-      btn.textContent = `< ${baseText}`;
-    } else {
-      btn.textContent = baseText;
-    }
+    btn.textContent = baseText;
   });
 }
 
