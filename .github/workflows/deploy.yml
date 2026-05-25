@@ -1,0 +1,43 @@
+name: 🚀 Deploy para cPanel
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Deploy via SSH → cPanel Git
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout do repositório
+      - name: 📥 Checkout do repositório
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # 2. Configurar chave SSH
+      - name: 🔑 Configurar SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.CPANEL_SSH_PRIVATE_KEY }}
+
+      # 3. Adicionar servidor ao known_hosts (evita prompt interativo)
+      - name: 🛡️ Adicionar servidor ao known_hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -p ${{ secrets.CPANEL_SSH_PORT }} ${{ secrets.CPANEL_SSH_HOST }} >> ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
+
+      # 4. Fazer push para o remote Git do cPanel
+      - name: 🚀 Push para o cPanel Git Version Control
+        run: |
+          git remote add cpanel ssh://${{ secrets.CPANEL_SSH_USER }}@${{ secrets.CPANEL_SSH_HOST }}:${{ secrets.CPANEL_SSH_PORT }}/${{ secrets.CPANEL_GIT_REMOTE }}
+          git push cpanel HEAD:main --force
+
+      # 5. (Opcional) Acionar o deploy automático via SSH — caso o cPanel não faça pull automático
+      - name: 🔄 Acionar pull no servidor (se necessário)
+        run: |
+          ssh -p ${{ secrets.CPANEL_SSH_PORT }} ${{ secrets.CPANEL_SSH_USER }}@${{ secrets.CPANEL_SSH_HOST }} \
+            "cd ~/repositories && git pull origin main" || true
