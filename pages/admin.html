@@ -59,6 +59,7 @@
         <button id="nav-procedimentos" class="nav-btn"        data-view="procedimentos">Procedimentos</button>
         <button id="nav-bloqueios"     class="nav-btn"        data-view="bloqueios">Bloqueios</button>
         <button id="nav-configuracoes" class="nav-btn"        data-view="configuracoes">Configurações</button>
+        <button id="nav-financeiro" class="nav-btn"           data-view="financeiro">Financeiro</button>
       </nav>
       <div class="sidebar-footer">
         <button id="btn-logout" class="btn-logout" aria-label="Sair">Sair</button>
@@ -107,6 +108,45 @@
       </div>
       <ul id="blocked-list" class="blocked-list">
         <!-- Populado via JS -->
+      </ul>
+    </div>
+
+    <!-- VIEW: Financeiro -->
+    <div id="view-financeiro" class="admin-view hidden">
+      <div class="view-toolbar">
+        <h3>Financeiro</h3>
+      </div>
+
+      <!-- Navegação mensal -->
+      <div class="finance-month-nav">
+        <button id="btn-prev-month" class="btn-icon" aria-label="Mês anterior">‹</button>
+        <span id="finance-month-label" class="finance-month-label">Junho 2026</span>
+        <button id="btn-next-month" class="btn-icon" aria-label="Próximo mês">›</button>
+      </div>
+
+      <!-- Cards de resumo -->
+      <div class="finance-summary">
+        <div class="finance-card finance-card-total">
+          <span class="finance-label">Receita Total</span>
+          <span class="finance-value" id="finance-total">—</span>
+        </div>
+        <div class="finance-row">
+          <div class="finance-card">
+            <span class="finance-label">Atendimentos</span>
+            <span class="finance-value-sm" id="finance-count">—</span>
+          </div>
+          <div class="finance-card">
+            <span class="finance-label">Ticket Médio</span>
+            <span class="finance-value-sm" id="finance-avg">—</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Detalhamento por procedimento -->
+      <h4 class="finance-subtitle">Por Procedimento</h4>
+      <ul id="finance-breakdown" class="finance-breakdown-list">
+        <li class="skeleton-card small"></li>
+        <li class="skeleton-card small"></li>
       </ul>
     </div>
 
@@ -415,8 +455,10 @@
     <li class="procedure-admin-item slide-up-anim">
       <div class="procedure-info">
         <strong class="procedure-name"></strong>
-        <span class="procedure-price"></span>
-        <span class="procedure-duration"></span>
+        <div class="procedure-meta">
+          <span class="procedure-price"></span>
+          <span class="procedure-duration"></span>
+        </div>
       </div>
       <div class="procedure-admin-actions">
         <button class="btn-icon edit" aria-label="Editar">✏️</button>

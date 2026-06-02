@@ -113,7 +113,8 @@ const originalNavTexts = {
   agenda: 'Agenda',
   procedimentos: 'Procedimentos',
   bloqueios: 'Bloqueios',
-  configuracoes: 'Configurações'
+  configuracoes: 'Configurações',
+  financeiro: 'Financeiro'
 };
 
 function updateNavTexts(activeView) {
@@ -154,6 +155,7 @@ function showView(viewName) {
   if (viewName === 'procedimentos') loadProceduresAdmin();
   if (viewName === 'bloqueios') loadBlockedSlots();
   if (viewName === 'configuracoes') loadConfig();
+  if (viewName === 'financeiro') loadFinancialDashboard(currentFinanceYear, currentFinanceMonth);
 }
 
 // ================================================
@@ -459,8 +461,8 @@ async function loadProceduresAdmin() {
       const d = docSnap.data();
       const clone = template.content.cloneNode(true);
       clone.querySelector('.procedure-name').textContent = d.name;
-      clone.querySelector('.procedure-price').textContent = d.price ? `R$ ${Number(d.price).toFixed(2)}` : '';
-      clone.querySelector('.procedure-duration').textContent = d.duration ? `${d.duration} min` : '';
+      clone.querySelector('.procedure-price').textContent = d.price ? `Valor: R$${Number(d.price).toFixed(2)}` : 'Valor: não se aplica';
+      clone.querySelector('.procedure-duration').textContent = d.duration ? `- Tempo: ${d.duration} min.` : '- Tempo: não se aplica';
       
       const editBtn = clone.querySelector('.edit');
       if (editBtn) {
@@ -975,8 +977,12 @@ async function adminLoadProcedures() {
       const li = document.createElement('li');
       li.className = 'procedure-item';
       li.innerHTML = `
-        <span class="procedure-name">${data.name}</span>
-        ${data.price ? `<span class="procedure-price">R$ ${Number(data.price).toFixed(2)}</span>` : ''}
+        <div class="procedure-info">
+          <span class="procedure-name">${data.name}</span>
+          <div class="procedure-meta">
+            ${data.price ? `<span class="procedure-price">Valor: R$${Number(data.price).toFixed(2)}</span>` : `<span class="procedure-price">Valor: não se aplica</span>`}
+          </div>
+        </div>
       `;
       // Se estiver no modo de reagendamento, pré-seleciona o procedimento correspondente
       if (rescheduleData && docSnap.id === rescheduleData.procedureId) {
@@ -1250,3 +1256,149 @@ adminClientForm.addEventListener('submit', async (e) => {
 
 // Aplicar máscara no input do telefone do salão em configurações
 applyPhoneMask(document.getElementById('config-phone'));
+
+// ================================================
+// VIEW: FINANCEIRO
+// ================================================
+
+// Mês/ano correntes sendo visualizados na aba Financeiro
+let currentFinanceYear  = new Date().getFullYear();
+let currentFinanceMonth = new Date().getMonth(); // 0 = Janeiro
+
+// Atualiza o título "Mês Ano" no topo da view Financeiro
+function renderFinanceMonthLabel() {
+  const label = document.getElementById('finance-month-label');
+  const months = [
+    'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+    'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+  ];
+  label.textContent = `${months[currentFinanceMonth]} ${currentFinanceYear}`;
+}
+
+/**
+ * Carrega o resumo financeiro de um mês específico.
+ * Consulta a coleção agendamentos por range de data,
+ * soma os preços e agrupa por procedimento.
+ *
+ * Firestore não possui SUM nativo — a agregação é feita
+ * client-side. O limite de 300 documentos é suficiente
+ * para a média mensal de um salão de pequeno porte.
+ *
+ * @param {number} year  - Ano (ex: 2026)
+ * @param {number} month - Mês (0-11)
+ */
+async function loadFinancialDashboard(year, month) {
+  const list = document.getElementById('finance-breakdown');
+  // Exibe skeleton loader enquanto os dados carregam
+  list.innerHTML = '<li class="skeleton-card small"></li>'.repeat(3);
+
+  renderFinanceMonthLabel();
+
+  // Monta strings de data para range (YYYY-MM-DD)
+  const pad = n => String(n).padStart(2, '0');
+  const monthStart = `${year}-${pad(month + 1)}-01`;
+  const lastDay = new Date(year, month + 1, 0).getDate();
+  const monthEnd = `${year}-${pad(month + 1)}-${pad(lastDay)}`;
+
+  try {
+    // Consulta: agendamentos dentro do intervalo do mês
+    const q = query(
+      collection(db, 'agendamentos'),
+      where('date', '>=', monthStart),
+      where('date', '<=', monthEnd),
+      orderBy('date'),
+      limit(300) // seguro para ~10 agendamentos/dia x 30 dias
+    );
+    const snap = await getDocs(q);
+
+    // Alerta se estourou o limite (para ajuste futuro)
+    if (snap.size >= 300) {
+      console.warn('[admin.js] Limite de 300 documentos atingido no financeiro. Considere aumentar o limit.');
+    }
+
+    let totalRevenue  = 0;   // Soma total dos preços
+    let totalCount    = 0;   // Atendimentos com preço definido
+    const procedureMap = new Map(); // name => { count, total }
+
+    snap.forEach(docSnap => {
+      const d     = docSnap.data();
+      const price = d.price ? Number(d.price) : 0;
+
+      totalRevenue += price;
+      if (d.price !== null) totalCount++;
+
+      // Agrupa por nome do procedimento
+      const procName = d.procedureName || 'Sem nome';
+      if (!procedureMap.has(procName)) {
+        procedureMap.set(procName, { count: 0, total: 0 });
+      }
+      const p = procedureMap.get(procName);
+      p.count++;
+      p.total += price;
+    });
+
+    // Total de atendimentos (incluindo os sem preço)
+    const totalAppointments = snap.size;
+
+    // Renderiza os cards de resumo
+    document.getElementById('finance-total').textContent =
+      totalRevenue > 0
+        ? `R$ ${totalRevenue.toFixed(2).replace('.', ',')}`
+        : 'R$ 0,00';
+
+    document.getElementById('finance-count').textContent = totalAppointments;
+
+    document.getElementById('finance-avg').textContent =
+      totalCount > 0
+        ? `R$ ${(totalRevenue / totalCount).toFixed(2).replace('.', ',')}`
+        : 'R$ 0,00';
+
+    // Renderiza a lista de procedimentos
+    list.innerHTML = '';
+
+    if (procedureMap.size === 0) {
+      list.innerHTML = '<li class="empty-state-msg slide-up-anim">Nenhum atendimento neste mês.</li>';
+      return;
+    }
+
+    // Ordena do maior valor total para o menor
+    const sorted = [...procedureMap.entries()].sort((a, b) => b[1].total - a[1].total);
+
+    for (const [name, data] of sorted) {
+      const li = document.createElement('li');
+      li.className = 'finance-breakdown-item slide-up-anim';
+      li.innerHTML = `
+        <div class="finance-breakdown-info">
+          <span class="finance-breakdown-name">${name}</span>
+          <span class="finance-breakdown-count">${data.count}x realizado</span>
+        </div>
+        <span class="finance-breakdown-total">R$ ${data.total.toFixed(2).replace('.', ',')}</span>
+      `;
+      list.appendChild(li);
+    }
+
+  } catch (err) {
+    console.error('[admin.js] Erro ao carregar financeiro:', err);
+    showToast('Erro ao carregar dados financeiros.', 'error');
+  }
+}
+
+// Navegação mensal: botão anterior
+document.getElementById('btn-prev-month').addEventListener('click', () => {
+  currentFinanceMonth--;
+  if (currentFinanceMonth < 0) {
+    currentFinanceMonth = 11;
+    currentFinanceYear--;
+  }
+  loadFinancialDashboard(currentFinanceYear, currentFinanceMonth);
+});
+
+// Navegação mensal: botão próximo
+document.getElementById('btn-next-month').addEventListener('click', () => {
+  currentFinanceMonth++;
+  if (currentFinanceMonth > 11) {
+    currentFinanceMonth = 0;
+    currentFinanceYear++;
+  }
+  loadFinancialDashboard(currentFinanceYear, currentFinanceMonth);
+});
