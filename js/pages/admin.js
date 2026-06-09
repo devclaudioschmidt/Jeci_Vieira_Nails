@@ -48,6 +48,9 @@ const adminBooking = {
 // ---- Estado do cancelamento pendente ----
 let pendingCancel = null;
 
+// ---- Estado da edição de valor pendente ----
+let pendingEditPrice = null;
+
 // ---- Estado do bloqueio pendente de exclusão ----
 let pendingDeleteBlock = null;
 
@@ -353,7 +356,28 @@ async function loadAgenda(date) {
       clone.querySelector('.appointment-time').textContent = d.time;
       clone.querySelector('.appointment-client').textContent = d.clientName;
       clone.querySelector('.appointment-procedure').textContent = d.procedureName;
-      clone.querySelector('.appointment-phone').textContent = formatPhoneNumber(d.clientPhone);
+      const priceEl = clone.querySelector('.appointment-price');
+      if (d.price) {
+        priceEl.textContent = `R$ ${Number(d.price).toFixed(2).replace('.', ',')}`;
+      } else {
+        priceEl.textContent = '—';
+        priceEl.style.opacity = '0.4';
+      }
+
+      // Botão Editar Valor
+      const btnPrice = clone.querySelector('.btn-price-appointment');
+      if (btnPrice) {
+        btnPrice.addEventListener('click', () => {
+          pendingEditPrice = { id: d.id };
+          document.getElementById('edit-price-client-name').textContent = d.clientName;
+          document.getElementById('edit-price-procedure-name').textContent = d.procedureName;
+          document.getElementById('edit-price-current').textContent = d.price
+            ? `R$ ${Number(d.price).toFixed(2).replace('.', ',')}`
+            : 'Não definido';
+          document.getElementById('edit-price-input').value = '';
+          modalEditPrice.showModal();
+        });
+      }
 
       // Botão WhatsApp: montar mensagem de lembrete para o cliente
       const btnWpp = clone.querySelector('.btn-whatsapp-client');
@@ -847,7 +871,6 @@ formBlock.addEventListener('submit', async (e) => {
     btn.textContent = 'Bloquear Horário';
   }
 });
-
 // ================================================
 // MODAL DE CANCELAMENTO DE AGENDAMENTO
 // ================================================
@@ -898,6 +921,51 @@ btnCancelYes.addEventListener('click', async () => {
     btnCancelYes.disabled = false;
     btnCancelYes.textContent = 'Sim, cancelar';
     closeCancelModal();
+  }
+});
+
+// ================================================
+// MODAL DE EDIÇÃO DE VALOR
+// ================================================
+const modalEditPrice     = document.getElementById('modal-edit-price');
+const btnCloseEditPrice  = document.getElementById('btn-close-edit-price-modal');
+const btnCancelEditPrice = document.getElementById('btn-cancel-edit-price');
+const btnSaveEditPrice   = document.getElementById('btn-save-edit-price');
+
+const closeEditPriceModal = () => {
+  pendingEditPrice = null;
+  modalEditPrice.close();
+};
+
+btnCloseEditPrice.addEventListener('click', closeEditPriceModal);
+btnCancelEditPrice.addEventListener('click', closeEditPriceModal);
+
+btnSaveEditPrice.addEventListener('click', async () => {
+  if (!pendingEditPrice) return;
+
+  const priceValue = document.getElementById('edit-price-input').value;
+  if (!priceValue || parseFloat(priceValue) < 0) {
+    return showToast('Informe um valor válido.', 'error');
+  }
+
+  btnSaveEditPrice.disabled = true;
+  btnSaveEditPrice.textContent = 'Salvando...';
+
+  try {
+    await setDoc(doc(db, 'agendamentos', pendingEditPrice.id), {
+      price: parseFloat(priceValue),
+      updatedAt: serverTimestamp()
+    }, { merge: true });
+
+    showToast('Valor atualizado com sucesso!', 'success');
+    closeEditPriceModal();
+    loadAgenda(selectedDate);
+  } catch (err) {
+    console.error('[admin.js] Erro ao atualizar valor:', err);
+    showToast('Erro ao salvar valor.', 'error');
+  } finally {
+    btnSaveEditPrice.disabled = false;
+    btnSaveEditPrice.textContent = 'Salvar';
   }
 });
 
@@ -955,6 +1023,8 @@ function resetAdminBooking() {
     modalTitle.textContent = 'Agendamento Manual';
   }
   
+  document.getElementById('admin-price-group').style.display = 'none';
+  document.getElementById('admin-price-input').value = '';
   adminClientForm.reset();
   btnAdminStep1Next.disabled = true;
   btnAdminStep2Next.disabled = true;
@@ -997,6 +1067,12 @@ async function adminLoadProcedures() {
         li.classList.add('selected');
         adminBooking.procedure = { id: docSnap.id, ...data };
         btnAdminStep1Next.disabled = false;
+        const priceGroup = document.getElementById('admin-price-group');
+        if (data.price) {
+          priceGroup.style.display = 'none';
+        } else {
+          priceGroup.style.display = 'block';
+        }
       });
       list.appendChild(li);
     });
@@ -1211,7 +1287,7 @@ adminClientForm.addEventListener('submit', async (e) => {
       procedureId: adminBooking.procedure.id,
       procedureName: adminBooking.procedure.name,
       procedureDuration: adminBooking.procedure.duration,
-      price: adminBooking.procedure.price,
+      price: adminBooking.procedure.price ?? (document.getElementById('admin-price-input').value ? parseFloat(document.getElementById('admin-price-input').value) : null),
       date: dateStr,
       time: adminBooking.time,
       clientName: name,

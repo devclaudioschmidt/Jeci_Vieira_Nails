@@ -323,6 +323,11 @@
             <label for="admin-client-phone-input">WhatsApp</label>
             <input id="admin-client-phone-input" type="tel" placeholder="(00) 00000-0000" required />
 
+            <div id="admin-price-group" style="display:none;">
+              <label for="admin-price-input">Valor do procedimento (R$)</label>
+              <input id="admin-price-input" type="number" step="0.01" min="0" placeholder="0,00" />
+            </div>
+
             <div class="modal-actions">
               <button id="btn-admin-step4-back" type="button" class="btn-secondary">Voltar</button>
               <button id="btn-admin-confirm" type="submit" class="btn-primary">📱 Agendar</button>
@@ -408,16 +413,43 @@
     </div>
   </dialog>
 
+  <!-- ===== MODAL DE EDIÇÃO DE VALOR ===== -->
+  <dialog id="modal-edit-price" class="app-modal" aria-labelledby="modal-edit-price-title">
+    <div class="modal-content">
+      <header class="modal-header">
+        <h3 id="modal-edit-price-title">Editar Valor</h3>
+        <button id="btn-close-edit-price-modal" class="btn-icon" aria-label="Fechar modal">&times;</button>
+      </header>
+      <div class="modal-body">
+        <p class="modal-cancel-text">Atualize o valor do procedimento:</p>
+        <div class="cancel-details">
+          <p><strong>Cliente:</strong> <span id="edit-price-client-name"></span></p>
+          <p><strong>Procedimento:</strong> <span id="edit-price-procedure-name"></span></p>
+          <p><strong>Valor atual:</strong> <span id="edit-price-current"></span></p>
+        </div>
+        <label for="edit-price-input">Novo valor (R$)</label>
+        <input id="edit-price-input" type="number" step="0.01" min="0" placeholder="0,00" />
+      </div>
+      <div class="modal-actions">
+        <button type="button" id="btn-cancel-edit-price" class="btn-secondary">Cancelar</button>
+        <button type="button" id="btn-save-edit-price" class="btn-primary">Salvar</button>
+      </div>
+    </div>
+  </dialog>
+
   <!-- ===== TEMPLATES ===== -->
   <template id="tpl-appointment">
     <li class="appointment-card slide-up-anim" data-appointment-id="">
-      <span class="appointment-time"></span>
-      <div class="appointment-info">
-        <p class="appointment-client"></p>
-        <p class="appointment-procedure"></p>
-        <p class="appointment-phone"></p>
+      <div class="appointment-card-row">
+        <span class="appointment-time"></span>
+        <span class="appointment-client"></span>
       </div>
-      <div class="appointment-actions">
+      <div class="appointment-card-row">
+        <span class="appointment-procedure"></span>
+        <span class="appointment-price"></span>
+      </div>
+      <div class="appointment-card-row appointment-actions">
+        <button class="btn-icon btn-action-client btn-price-appointment" aria-label="Editar valor do procedimento" title="Editar valor">💰</button>
         <button class="btn-icon btn-action-client btn-whatsapp-client" aria-label="Enviar mensagem no WhatsApp" title="Enviar mensagem">📱</button>
         <button class="btn-icon btn-action-client btn-reschedule-appointment" aria-label="Reagendar agendamento" title="Reagendar agendamento">🔄</button>
         <button class="btn-icon btn-action-client btn-cancel-appointment" aria-label="Cancelar agendamento" title="Cancelar agendamento">🗑️</button>
