@@ -545,6 +545,11 @@ textarea {
   color: hsl(340, 20%, 8%);
 }
 
+.cal-day.past {
+  border-color: var(--color-border);
+  opacity: 0.6;
+}
+
 .cal-day.disabled {
   opacity: 0.35;
   cursor: not-allowed;

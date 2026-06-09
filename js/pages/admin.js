@@ -226,7 +226,7 @@ async function buildAdminCalendar(month) {
     const date    = new Date(year, m, d);
     const isPast  = date < today;
     const isSunday = date.getDay() === 0;
-    const isDisabled = isPast || isSunday;
+    const isDisabled = isSunday;
     const isSelected = date.toDateString() === selectedDate.toDateString();
     const dateStr = `${year}-${pad(m + 1)}-${pad(d)}`;
     const hasAppt = datesWithAppts.has(dateStr);
@@ -234,6 +234,7 @@ async function buildAdminCalendar(month) {
     const hasBlock = datesWithBlocks.has(dateStr);
 
     let classes = 'cal-day';
+    if (isPast)      classes += ' past';
     if (isDisabled)  classes += ' disabled';
     if (isSelected)  classes += ' selected';
     if (hasAppt)     classes += ' has-appointment';
