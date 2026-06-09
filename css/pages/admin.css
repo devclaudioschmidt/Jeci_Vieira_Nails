@@ -279,6 +279,12 @@
   color: var(--color-text-muted);
 }
 
+.appointment-price {
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--color-success);
+}
+
 .appointment-phone {
   font-size: var(--fs-sm);
   color: var(--color-text-muted);
