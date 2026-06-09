@@ -10,6 +10,10 @@ import {
 }                                                            from 'https://www.gstatic.com/firebasejs/11.7.1/firebase-firestore.js';
 import { showToast, formatDatePTBR, getGreeting, buildWhatsAppUrl, buildCalNavHTML, applyPhoneMask, formatPhoneNumber } from '../global.js';
 
+// ---- Funções utilitárias ----
+const toMin = t => { if (!t) return 0; const [h, m] = t.split(':').map(Number); return h * 60 + m; };
+const toStr = m => { const h = Math.floor(m / 60).toString().padStart(2, '0'); const min = (m % 60).toString().padStart(2, '0'); return `${h}:${min}`; };
+
 // ---- Referências DOM ----
 const loginScreen  = document.getElementById('login-screen');
 const adminPanel   = document.getElementById('admin-panel');
@@ -353,7 +357,8 @@ async function loadAgenda(date) {
 
       const clone = template.content.cloneNode(true);
       clone.querySelector('[data-appointment-id]').dataset.appointmentId = d.id;
-      clone.querySelector('.appointment-time').textContent = d.time;
+      const endMin = toMin(d.time) + (d.procedureDuration || 60);
+      clone.querySelector('.appointment-time').textContent = `${d.time} - ${toStr(endMin)}`;
       clone.querySelector('.appointment-client').textContent = d.clientName;
       clone.querySelector('.appointment-procedure').textContent = d.procedureName;
       const priceEl = clone.querySelector('.appointment-price');
@@ -771,8 +776,6 @@ formBlock.addEventListener('submit', async (e) => {
   const blockEnd  = document.getElementById('block-end').value;
   const blockText = document.getElementById('block-text').value.trim();
 
-  const toMin = t => { if (!t) return 0; const [h, m] = t.split(':').map(Number); return h * 60 + m; };
-
   // Validar horário
   if (toMin(blockInit) >= toMin(blockEnd)) {
     return showToast('Horário de término deve ser após o início.', 'error');
@@ -1167,42 +1170,6 @@ async function adminBuildTimeSlots() {
       hEnd   = config.hoursEnd   || '18:00';
       iStart = config.hoursIntervalStart || '12:00';
       iEnd   = config.hoursIntervalEnd   || '13:00';
-    }
-
-    const toMin = t => { if(!t) return 0; const [h,m] = t.split(':').map(Number); return h*60+m; };
-    const toStr = m => { const h=Math.floor(m/60).toString().padStart(2,'0'); const min=(m%60).toString().padStart(2,'0'); return `${h}:${min}`; };
-
-    const startMin = toMin(hStart);
-    const endMin   = toMin(hEnd);
-    const intStart = iStart ? toMin(iStart) : null;
-    const intEnd   = iEnd ? toMin(iEnd) : null;
-
-    const y = adminBooking.date.getFullYear();
-    const m = String(adminBooking.date.getMonth() + 1).padStart(2, '0');
-    const d = String(adminBooking.date.getDate()).padStart(2, '0');
-    const dateStr = `${y}-${m}-${d}`;
-
-    const q = query(collection(db, 'agendamentos'), where('date', '==', dateStr));
-    const snap = await getDocs(q);
-    const appointments = [];
-    snap.forEach(doc => {
-      const data = doc.data();
-      const s = toMin(data.time);
-      const dur = data.procedureDuration || 60;
-      appointments.push({ start: s, end: s + dur });
-    });
-
-    // Buscar bloqueios do admin para esta data
-    const blockSlots = [];
-    try {
-      const blockQ = query(collection(db, 'horariosBloqueados'), where('blockDate', '==', dateStr));
-      const blockSnap = await getDocs(blockQ);
-      blockSnap.forEach(doc => {
-        const data = doc.data();
-        blockSlots.push({ start: toMin(data.blockInit), end: toMin(data.blockEnd) });
-      });
-    } catch (err) {
-      console.error('[admin.js] Erro ao buscar bloqueios:', err);
     }
 
     const duration = adminBooking.procedure.duration || 60;

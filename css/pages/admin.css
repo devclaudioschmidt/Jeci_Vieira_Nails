@@ -613,8 +613,10 @@
   color: var(--color-error);
 }
 
-.block-appointment-card .block-motive-text {
+.block-motive-text {
+  font-size: var(--fs-sm);
   font-style: italic;
+  color: var(--color-text-muted);
 }
 
 /* Dia com bloqueio no calendário admin */
