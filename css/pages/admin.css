@@ -245,8 +245,8 @@
 
 .appointment-card {
   display: flex;
-  align-items: center;
-  gap: var(--space-4);
+  flex-direction: column;
+  gap: var(--space-2);
   padding: var(--space-4);
   background: var(--color-surface);
   border: 1px solid var(--color-border);
@@ -258,20 +258,22 @@
   border-color: var(--color-primary);
 }
 
+.appointment-card-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
 .appointment-time {
   font-size: var(--fs-md);
   font-weight: 700;
   color: var(--color-primary);
-  white-space: nowrap;
-}
-
-.appointment-info {
-  flex: 1;
 }
 
 .appointment-client {
   font-weight: 600;
   font-size: var(--fs-base);
+  text-align: right;
 }
 
 .appointment-procedure {
@@ -283,18 +285,14 @@
   font-size: var(--fs-sm);
   font-weight: 600;
   color: var(--color-success);
-}
-
-.appointment-phone {
-  font-size: var(--fs-sm);
-  color: var(--color-text-muted);
+  text-align: right;
 }
 
 .appointment-actions {
   display: flex;
   gap: var(--space-3);
   align-items: center;
-  flex-shrink: 0;
+  justify-content: flex-end;
 }
 
 .btn-action-client {

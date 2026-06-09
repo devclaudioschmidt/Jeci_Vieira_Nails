@@ -440,14 +440,15 @@
   <!-- ===== TEMPLATES ===== -->
   <template id="tpl-appointment">
     <li class="appointment-card slide-up-anim" data-appointment-id="">
-      <span class="appointment-time"></span>
-      <div class="appointment-info">
-        <p class="appointment-client"></p>
-        <p class="appointment-procedure"></p>
-        <p class="appointment-price"></p>
-        <p class="appointment-phone"></p>
+      <div class="appointment-card-row">
+        <span class="appointment-time"></span>
+        <span class="appointment-client"></span>
       </div>
-      <div class="appointment-actions">
+      <div class="appointment-card-row">
+        <span class="appointment-procedure"></span>
+        <span class="appointment-price"></span>
+      </div>
+      <div class="appointment-card-row appointment-actions">
         <button class="btn-icon btn-action-client btn-price-appointment" aria-label="Editar valor do procedimento" title="Editar valor">💰</button>
         <button class="btn-icon btn-action-client btn-whatsapp-client" aria-label="Enviar mensagem no WhatsApp" title="Enviar mensagem">📱</button>
         <button class="btn-icon btn-action-client btn-reschedule-appointment" aria-label="Reagendar agendamento" title="Reagendar agendamento">🔄</button>

@@ -358,12 +358,11 @@ async function loadAgenda(date) {
       clone.querySelector('.appointment-procedure').textContent = d.procedureName;
       const priceEl = clone.querySelector('.appointment-price');
       if (d.price) {
-        priceEl.textContent = `💰 R$ ${Number(d.price).toFixed(2).replace('.', ',')}`;
+        priceEl.textContent = `R$ ${Number(d.price).toFixed(2).replace('.', ',')}`;
       } else {
-        priceEl.textContent = '💰 —';
+        priceEl.textContent = '—';
         priceEl.style.opacity = '0.4';
       }
-      clone.querySelector('.appointment-phone').textContent = formatPhoneNumber(d.clientPhone);
 
       // Botão Editar Valor
       const btnPrice = clone.querySelector('.btn-price-appointment');
