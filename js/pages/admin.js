@@ -1172,6 +1172,38 @@ async function adminBuildTimeSlots() {
       iEnd   = config.hoursIntervalEnd   || '13:00';
     }
 
+    const startMin = toMin(hStart);
+    const endMin   = toMin(hEnd);
+    const intStart = iStart ? toMin(iStart) : null;
+    const intEnd   = iEnd ? toMin(iEnd) : null;
+
+    const y = adminBooking.date.getFullYear();
+    const m = String(adminBooking.date.getMonth() + 1).padStart(2, '0');
+    const d = String(adminBooking.date.getDate()).padStart(2, '0');
+    const dateStr = `${y}-${m}-${d}`;
+
+    const q = query(collection(db, 'agendamentos'), where('date', '==', dateStr));
+    const snap = await getDocs(q);
+    const appointments = [];
+    snap.forEach(doc => {
+      const data = doc.data();
+      const s = toMin(data.time);
+      const dur = data.procedureDuration || 60;
+      appointments.push({ start: s, end: s + dur });
+    });
+
+    const blockSlots = [];
+    try {
+      const blockQ = query(collection(db, 'horariosBloqueados'), where('blockDate', '==', dateStr));
+      const blockSnap = await getDocs(blockQ);
+      blockSnap.forEach(doc => {
+        const data = doc.data();
+        blockSlots.push({ start: toMin(data.blockInit), end: toMin(data.blockEnd) });
+      });
+    } catch (err) {
+      console.error('[admin.js] Erro ao buscar bloqueios:', err);
+    }
+
     const duration = adminBooking.procedure.duration || 60;
     const slots = [];
 
