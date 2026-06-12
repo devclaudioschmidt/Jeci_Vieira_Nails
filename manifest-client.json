@@ -1,5 +1,6 @@
 {
-  "name": "Jeci Vieira Nails Designer",
+  "id": "jeci-nails-client",
+  "name": "Jeci Vieira Nails",
   "short_name": "Jeci Nails",
   "description": "Agende seu horário na Jeci Vieira Nails Designer",
   "start_url": "index.html",
