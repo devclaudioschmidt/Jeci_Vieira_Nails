@@ -1,7 +1,8 @@
 // ================================================
 // agendamento.js — Fluxo de Agendamento (A5.1–A5.4)
 // ================================================
-import { db } from '../firebase/config.js';
+import { db, auth } from '../firebase/config.js';
+import { signInAnonymously } from 'https://www.gstatic.com/firebasejs/11.7.1/firebase-auth.js';
 import { collection, getDocs, query, orderBy, doc, getDoc, where } from 'https://www.gstatic.com/firebasejs/11.7.1/firebase-firestore.js';
 import { applyPhoneMask, formatDatePTBR, showToast, buildCalNavHTML } from '../global.js';
 
@@ -425,5 +426,10 @@ clientForm.addEventListener('submit', (e) => {
 });
 
 // ---- Init ----
-loadProcedures();
-buildCalendar();
+(async () => {
+  if (!auth.currentUser) {
+    try { await signInAnonymously(auth); } catch (_) {}
+  }
+  loadProcedures();
+  buildCalendar();
+})();
