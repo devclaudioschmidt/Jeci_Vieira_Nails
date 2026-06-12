@@ -151,3 +151,26 @@ formSearch.addEventListener('submit', async (e) => {
     btnSubmitSearch.textContent = 'Buscar';
   }
 });
+
+// ================================================
+// EASTER EGG: Multi-tap no logo → Painel Admin
+// 5 toques em ate 3s para acessar o admin
+// ================================================
+(() => {
+  const logo = document.querySelector('.salon-logo');
+  let tapCount = 0;
+  let tapTimer = null;
+
+  if (!logo) return;
+
+  logo.addEventListener('click', () => {
+    tapCount++;
+    clearTimeout(tapTimer);
+    tapTimer = setTimeout(() => { tapCount = 0; }, 3000);
+    if (tapCount >= 5) {
+      tapCount = 0;
+      showToast('Acessando painel admin…', 'success');
+      setTimeout(() => { window.location.href = 'pages/admin.html'; }, 400);
+    }
+  });
+})();

@@ -91,6 +91,11 @@
   filter: brightness(1.2);
 }
 
+/* Easter egg: logo clicável (multi-tap → admin) */
+.salon-logo {
+  cursor: pointer;
+}
+
 
 
 /* ---- Resultados da busca de agendamentos (modal) ---- */
