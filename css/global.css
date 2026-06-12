@@ -598,6 +598,10 @@ textarea {
   color: var(--color-bg);
 }
 
+.procedure-item.selected .procedure-price {
+  color: var(--color-bg);
+}
+
 .time-slot-list {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
