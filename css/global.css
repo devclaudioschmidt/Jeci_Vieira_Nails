@@ -24,6 +24,11 @@ body {
   color: var(--color-text);
   min-height: 100dvh;
   line-height: 1.6;
+  /* Safe area para PWA standalone (iOS notch/status bar) */
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
 }
 
 img,

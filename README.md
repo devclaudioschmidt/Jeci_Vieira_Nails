@@ -7,6 +7,7 @@ Sistema de agendamento para salão de nail design com painel administrativo, flu
 - **Core:** HTML5, CSS3, JavaScript (ES6+) puros — sem frameworks
 - **Backend:** Firebase (Firestore, Authentication)
 - **Ícones:** Emoji nativos — sem dependências externas
+- **PWA:** Manifest JSON + Service Worker pass-through (modo standalone sem barras do navegador)
 
 ## Estrutura de Pastas
 
@@ -33,10 +34,14 @@ Sistema de agendamento para salão de nail design com painel administrativo, flu
 │       ├── agendamento.js
 │       ├── confirmacao.js
 │       └── admin.js
+├── manifest.json              # Manifest PWA (display: standalone)
+├── sw.js                      # Service Worker (pass-through, sem cache)
 └── assets/
     └── img/
         ├── logoJeciVieira.svg
-        └── favicon.png           # Ícone do site
+        ├── favicon.png           # Ícone do site
+        ├── icon-192x192.png      # Ícone PWA 192x192px
+        └── icon-512x512.png      # Ícone PWA 512x512px
 ```
 
 ## Funcionalidades
@@ -111,6 +116,29 @@ Todas as cores, espaçamentos e tipografia usam variáveis CSS definidas em `glo
 - **Mobile-first** — desenvolvimento começa pela menor tela
 - **Design System** — variáveis CSS para consistência visual
 - **Firebase:** `limit()` em consultas, `serverTimestamp()`, estrutura flat
+
+## Progressive Web App (PWA)
+
+O webapp possui suporte a PWA para ser adicionado à tela inicial do celular e abrir sem as barras de navegação do navegador.
+
+### Como usar
+
+- **iPhone (Safari):** Toque em Compartilhar → "Adicionar à Tela de Início" → o app abrirá em modo standalone (sem barra do Safari)
+- **Android (Chrome):** O banner "Adicionar à tela inicial" aparecerá automaticamente. Ao instalar, abrirá sem a barra de navegação
+- Também funciona no modo Desktop: o Chrome exibirá o botão de instalação na barra de endereço
+
+### O que foi implementado
+
+- `manifest.json` — define nome, ícones, cor de tema e `display: standalone`
+- `sw.js` — Service Worker mínimo (pass-through) que apenas repassa requisições para a rede, **sem cache**. Necessário apenas para habilitar o manifesto nos navegadores Android
+- Meta tags iOS — `apple-mobile-web-app-capable`, `apple-mobile-web-app-status-bar-style`, `apple-mobile-web-app-title` — essenciais para o Safari abrir em modo standalone
+- `viewport-fit=cover` — permite que o app use a tela inteira em iPhones com notch
+- `env(safe-area-inset-*)` no `global.css` — padding automático para proteger conteúdo do notch e barra de status
+- Ícones PWA 192x192 e 512x512 gerados a partir do `logoJeciVieira.svg`
+
+### Cache
+
+O Service Worker **não faz cache** de nenhum recurso. Toda requisição continua indo diretamente para a rede, preservando o comportamento original do webapp.
 
 ## Fluxo Git
 
