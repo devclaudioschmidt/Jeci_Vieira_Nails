@@ -1,7 +1,8 @@
 // ================================================
 // index.js — Lógica da Tela Inicial (Role Cliente)
 // ================================================
-import { db }                         from '../firebase/config.js';
+import { db, auth }                   from '../firebase/config.js';
+import { signInAnonymously }          from 'https://www.gstatic.com/firebasejs/11.7.1/firebase-auth.js';
 import { doc, getDoc, collection, query, where, getDocs, orderBy, limit } from 'https://www.gstatic.com/firebasejs/11.7.1/firebase-firestore.js';
 import { showToast, formatDatePTBR, applyPhoneMask, getGreeting, formatPhoneNumber } from '../global.js';
 
@@ -56,7 +57,12 @@ async function loadSalonInfo() {
 }
 
 // Ponto de entrada
-loadSalonInfo();
+(async () => {
+  if (!auth.currentUser) {
+    try { await signInAnonymously(auth); } catch (_) {}
+  }
+  loadSalonInfo();
+})();
 
 // ================================================
 // BUSCA DE AGENDAMENTOS

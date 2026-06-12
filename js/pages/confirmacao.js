@@ -1,7 +1,8 @@
 // ================================================
 // confirmacao.js — Tela de Confirmação (A5.5–A5.7)
 // ================================================
-import { db } from '../firebase/config.js';
+import { db, auth } from '../firebase/config.js';
+import { signInAnonymously } from 'https://www.gstatic.com/firebasejs/11.7.1/firebase-auth.js';
 import { collection, addDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/11.7.1/firebase-firestore.js';
 import { buildWhatsAppUrl, formatDatePTBR, showToast, formatPhoneNumber } from '../global.js';
 
@@ -28,6 +29,10 @@ document.getElementById('btn-confirmar-whatsapp').addEventListener('click', asyn
   const btn = document.getElementById('btn-confirmar-whatsapp');
   btn.disabled = true;
   btn.textContent = 'Salvando…';
+
+  if (!auth.currentUser) {
+    try { await signInAnonymously(auth); } catch (_) {}
+  }
 
   try {
     // 1. Persistir no Firestore
