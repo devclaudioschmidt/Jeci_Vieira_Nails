@@ -34,14 +34,18 @@ Sistema de agendamento para salão de nail design com painel administrativo, flu
 │       ├── agendamento.js
 │       ├── confirmacao.js
 │       └── admin.js
-├── manifest.json              # Manifest PWA (display: standalone)
-├── sw.js                      # Service Worker (pass-through, sem cache)
+├── manifest-client.json       # Manifest PWA do cliente (display: standalone)
+├── manifest-admin.json        # Manifest PWA do admin (display: standalone)
+├── sw-client.js               # Service Worker do cliente (pass-through, sem cache)
+├── sw-admin.js                # Service Worker do admin (pass-through, sem cache)
 └── assets/
     └── img/
         ├── logoJeciVieira.svg
         ├── favicon.png           # Ícone do site
-        ├── icon-192x192.png      # Ícone PWA 192x192px
-        └── icon-512x512.png      # Ícone PWA 512x512px
+        ├── icon-192x192.png      # Ícone PWA cliente 192x192px
+        ├── icon-512x512.png      # Ícone PWA cliente 512x512px
+        ├── icon-admin-192x192.png # Ícone PWA admin 192x192px (com badge)
+        └── icon-admin-512x512.png # Ícone PWA admin 512x512px (com badge)
 ```
 
 ## Funcionalidades
@@ -119,26 +123,37 @@ Todas as cores, espaçamentos e tipografia usam variáveis CSS definidas em `glo
 
 ## Progressive Web App (PWA)
 
-O webapp possui suporte a PWA para ser adicionado à tela inicial do celular e abrir sem as barras de navegação do navegador.
+O webapp possui **dois PWAs independentes**, um para clientes e outro para o administrador, que podem ser instalados lado a lado no celular.
 
-### Como usar
+### PWAs disponíveis
 
-- **iPhone (Safari):** Toque em Compartilhar → "Adicionar à Tela de Início" → o app abrirá em modo standalone (sem barra do Safari)
-- **Android (Chrome):** O banner "Adicionar à tela inicial" aparecerá automaticamente. Ao instalar, abrirá sem a barra de navegação
-- Também funciona no modo Desktop: o Chrome exibirá o botão de instalação na barra de endereço
+| PWA | Nome | Instalar a partir de | Manifest |
+|---|---|---|---|
+| **Cliente** (público) | Jeci Vieira Nails | `index.html`, `agendamento.html`, `confirmacao.html` | `manifest-client.json` |
+| **Admin** (restrito) | Admin - Jeci Nails | `pages/admin.html` | `manifest-admin.json` |
+
+### Como instalar
+
+- **iPhone (Safari):** Acesse a página desejada → Compartilhar → "Adicionar à Tela de Início" → o app abrirá em modo standalone (sem barra do Safari)
+- **Android (Chrome):** O banner "Adicionar à tela inicial" aparecerá automaticamente na página correspondente. Ao instalar, abrirá sem a barra de navegação
+- **Desktop:** Chrome exibirá o botão de instalação na barra de endereço
+
+> **Dica:** O admin pode acessar rapidamente `pages/admin.html` pelo easter egg de 5 toques no logo na tela inicial.
 
 ### O que foi implementado
 
-- `manifest.json` — define nome, ícones, cor de tema e `display: standalone`
-- `sw.js` — Service Worker mínimo (pass-through) que apenas repassa requisições para a rede, **sem cache**. Necessário apenas para habilitar o manifesto nos navegadores Android
+- `manifest-client.json` — manifesto do PWA cliente (`id: "jeci-nails-client"`, `start_url: "index.html"`)
+- `manifest-admin.json` — manifesto do PWA admin (`id: "jeci-nails-admin"`, `start_url: "pages/admin.html"`)
+- `sw-client.js` e `sw-admin.js` — Service Workers pass-through (sem cache), um para cada PWA
 - Meta tags iOS — `apple-mobile-web-app-capable`, `apple-mobile-web-app-status-bar-style`, `apple-mobile-web-app-title` — essenciais para o Safari abrir em modo standalone
 - `viewport-fit=cover` — permite que o app use a tela inteira em iPhones com notch
 - `env(safe-area-inset-*)` no `global.css` — padding automático para proteger conteúdo do notch e barra de status
-- Ícones PWA 192x192 e 512x512 gerados a partir do `logoJeciVieira.svg`
+- Ícones PWA do cliente (192x192 e 512x512) gerados a partir do `logoJeciVieira.svg`
+- Ícones PWA do admin (192x192 e 512x512) com badge "A" no canto para diferenciar visualmente
 
 ### Cache
 
-O Service Worker **não faz cache** de nenhum recurso. Toda requisição continua indo diretamente para a rede, preservando o comportamento original do webapp.
+Os Service Workers **não fazem cache** de nenhum recurso. Toda requisição continua indo diretamente para a rede, preservando o comportamento original do webapp.
 
 ## Fluxo Git
 

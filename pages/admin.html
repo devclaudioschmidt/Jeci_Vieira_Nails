@@ -14,10 +14,10 @@
   <!-- Apple iOS: Modo standalone (sem barra do Safari) -->
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="Jeci Nails" />
+  <meta name="apple-mobile-web-app-title" content="Admin JVN" />
 
-  <!-- Manifest PWA (Android + iOS 16.4+) -->
-  <link rel="manifest" href="../manifest.json" />
+  <!-- Manifest PWA (Admin) -->
+  <link rel="manifest" href="../manifest-admin.json" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -510,7 +510,7 @@
   <!-- Registro do Service Worker (PWA) -->
   <script>
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('../sw.js');
+      navigator.serviceWorker.register('../sw-admin.js');
     }
   </script>
 

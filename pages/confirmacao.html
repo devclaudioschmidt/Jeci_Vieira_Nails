@@ -16,8 +16,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Jeci Nails" />
 
-  <!-- Manifest PWA (Android + iOS 16.4+) -->
-  <link rel="manifest" href="../manifest.json" />
+  <!-- Manifest PWA (Cliente) -->
+  <link rel="manifest" href="../manifest-client.json" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -77,7 +77,7 @@
   <!-- Registro do Service Worker (PWA) -->
   <script>
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('../sw.js');
+      navigator.serviceWorker.register('../sw-client.js');
     }
   </script>
 
